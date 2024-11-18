@@ -1,0 +1,9 @@
+{
+  "calculatorCreateOperation": "OperationPost",
+  "calculatorDeleteRecords": "OperationDelete",
+  "calculatorListOperations": "OperationList",
+  "calculatorListRecords": "RecordList",
+  "calculatorLogin": "UserAuthFunction",
+  "calculatorLogout": "UserLogoutFunction",
+  "calculatorSignup": "UserRegisterFunction"
+}
