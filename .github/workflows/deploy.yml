@@ -26,6 +26,7 @@ jobs:
         run: |
           changed_dirs=$(git diff --name-only origin/master HEAD | grep -oE '^calculator[^/]+/' | sort -u)
           echo "changed_dirs=${changed_dirs}" >> $GITHUB_ENV
+          echo "Detected changed directories: ${changed_dirs}"
 
       - name: Validate JSON mapping
         run: jq . lambda-mapping.json > /dev/null
