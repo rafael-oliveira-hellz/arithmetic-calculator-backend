@@ -18,58 +18,46 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
+      - name: Checkout and fetch repository
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
 
-      # - name: Fetch all branches
-      # run: git fetch --prune --unshallow --tags
-
-      # - name: Debug changed files and directories
-      #   run: |
-      #     echo "Current branch: $(git branch --show-current)"
-      #     echo "Files changed between origin/master and HEAD:"
-      #     git diff --name-only origin/master HEAD || echo "No files changed"
-      #     changed_dirs=$(git diff --name-only origin/master HEAD | grep -oE '^calculator[^/]+' | sort -u)
-      #     echo "Detected changed directories: ${changed_dirs}"
-      #     if [ -z "$changed_dirs" ]; then
-      #       echo "No directories detected. Exiting."
-      #       exit 1
-      #     fi
-      #     echo "changed_dirs=${changed_dirs}" >> $GITHUB_ENV
-
-      # - name: Identify changed directories
-      #   id: detect-dir
-      #   run: |
-      #     changed_dirs=$(git diff --name-only origin/master HEAD | grep -oE '^calculator[^/]+' | sort -u)
-      #     echo "changed_dirs=${changed_dirs}" >> $GITHUB_ENV
-      #     echo "Detected changed directories: ${changed_dirs}"
-
-      # - name: Validate JSON mapping
-      #   run: jq . lambda-mapping.json > /dev/null
-
-      # - name: Load Lambda Mapping
-      #   id: load-mapping
-      #   run: |
-      #     MAP=$(cat lambda-mapping.json)
-      #     for dir in ${{ env.changed_dirs }}; do
-      #       clean_dir=$(echo $dir | tr -d '/')
-      #       LAMBDA_NAME=$(echo $MAP | jq -r ".${clean_dir}")
-      #       if [ "$LAMBDA_NAME" != "null" ]; then
-      #         echo "lambda_name=${LAMBDA_NAME}" >> $GITHUB_ENV
-      #         echo "changed_dir=${dir}" >> $GITHUB_ENV
-      #         break
-      #       fi
-      #     done
-
-      # - name: Debug changed directory and Lambda function
-      #   run: |
-      #     echo "Changed directory: ${{ env.changed_dir }}"
-      #     echo "Lambda function: ${{ env.lambda_name }}"
-
-      - name: Force a changed directory for testing
+      - name: Identify changed directories
+        id: detect-dir
         run: |
-          echo "Forcing changed_dirs to calculatorLogout/"
-          echo "changed_dirs=calculatorLogout/" >> $GITHUB_ENV
+          git fetch --prune --unshallow
+          changed_dirs=$(git diff --name-only origin/master~1 HEAD | grep -oE '^calculator[^/]+' | sort -u)
+          if [ -z "$changed_dirs" ]; then
+            echo "No directories detected. Exiting."
+            exit 1
+          fi
+          echo "Detected changed directories: ${changed_dirs}"
+          echo "changed_dirs=${changed_dirs}" >> $GITHUB_ENV
+
+      - name: Load Lambda mapping
+        id: load-mapping
+        run: |
+          jq . lambda-mapping.json > /dev/null
+          MAP=$(cat lambda-mapping.json)
+          for dir in ${{ env.changed_dirs }}; do
+            clean_dir=$(echo $dir | tr -d '/')
+            LAMBDA_NAME=$(echo $MAP | jq -r ".${clean_dir}")
+            if [ "$LAMBDA_NAME" != "null" ]; then
+              echo "lambda_name=${LAMBDA_NAME}" >> $GITHUB_ENV
+              echo "changed_dir=${dir}" >> $GITHUB_ENV
+              break
+            fi
+          done
+          if [ -z "${LAMBDA_NAME}" ]; then
+            echo "No Lambda mapping found. Exiting."
+            exit 1
+          fi
+
+      - name: Debug changed directory and Lambda function
+        run: |
+          echo "Changed directory: ${{ env.changed_dir }}"
+          echo "Lambda function: ${{ env.lambda_name }}"
 
       - name: Set up Java
         uses: actions/setup-java@v3
@@ -77,16 +65,11 @@ jobs:
           distribution: "temurin"
           java-version: "21"
 
-      - name: Build with Maven
+      - name: Build and package Lambda
         working-directory: ${{ env.changed_dir }}
         run: |
-          echo "Entering directory: ${{ env.changed_dirs }}"
-          cd ${{ env.changed_dirs }}
           mvn clean package -DskipTests
-
-      - name: Zip the Lambda artifact
-        run: |
-          zip -j lambda-artifact.zip ${{ env.changed_dir }}/target/*.jar
+          zip -j lambda-artifact.zip target/*.jar
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v2
@@ -95,7 +78,7 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: sa-east-1
 
-      - name: Update Lambda function
+      - name: Deploy Lambda function
         run: |
           aws lambda update-function-code \
             --function-name ${{ env.lambda_name }} \
