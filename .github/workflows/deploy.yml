@@ -18,18 +18,15 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Checkout do código
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # Step 2: Identificar diretório modificado
       - name: Identify changed directory
         id: detect-dir
         run: |
           changed_dirs=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -oE '^calculator[^/]+/' | sort -u)
           echo "changed_dirs=$changed_dirs" >> $GITHUB_ENV
 
-      # Step 3: Carregar o mapeamento do lambda
       - name: Load Lambda Mapping
         id: load-mapping
         run: |
@@ -37,20 +34,17 @@ jobs:
           LAMBDA_NAME=$(echo $MAP | jq -r ".${{ env.changed_dir }}")
           echo "lambda_name=${LAMBDA_NAME}" >> $GITHUB_ENV
 
-      # Step 4: Configurar Java e Maven
       - name: Set up Java
         uses: actions/setup-java@v3
         with:
           distribution: 'temurin'
           java-version: '21'
 
-      # Step 5: Build o backend
       - name: Build with Maven
         working-directory: ${{ env.changed_dir }}
         run: |
           mvn clean package -DskipTests -DfinalName=${{ env.changed_dir }}-artifact
 
-      # Step 6: Configurar credenciais da AWS
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
@@ -58,12 +52,10 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: sa-east-1
 
-      # Step 7: Fazer o zip do artefato
       - name: Zip the artifact
         working-directory: ${{ env.changed_dir }}
         run: zip -j ../${{ env.changed_dir }}-artifact.zip target/${{ env.changed_dir }}-artifact.jar
 
-      # Step 8: Atualizar a Lambda
       - name: Update Lambda function
         run: |
           aws lambda update-function-code \
