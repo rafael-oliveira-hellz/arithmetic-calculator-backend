@@ -67,10 +67,7 @@ jobs:
 
       - name: Build and package Lambda
         working-directory: ${{ env.changed_dir }}
-        run: |
-          mvn clean package -DskipTests -DfinalName=${{ env.changed_dir }}-artifact
-          ls -R ${{ env.changed_dir }}/target
-          zip -j lambda-artifact.zip ${{ env.changed_dir }}/target/${{ env.changed_dir }}-artifact.jar
+        run: mvn clean package -DskipTests
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v2
@@ -83,4 +80,4 @@ jobs:
         run: |
           aws lambda update-function-code \
             --function-name ${{ env.lambda_name }} \
-            --zip-file fileb://lambda-artifact.zip
+            --zip-file fileb://calculator-1.0-SNAPSHOT-lambda-package.zip
