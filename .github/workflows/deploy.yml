@@ -1,4 +1,4 @@
-name: Deploy Lambda
+name: Build and Deploy Lambda
 
 on:
   push:
@@ -21,6 +21,9 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
+      - name: Install jq
+        run: sudo apt-get install jq
+
       - name: Identify changed directory
         id: detect-dir
         run: |
@@ -31,20 +34,9 @@ jobs:
         id: load-mapping
         run: |
           MAP=$(cat lambda-mapping.json)
-          echo "Mapping loaded: $MAP"
-          CHANGED_DIR=$(echo ${{ env.changed_dirs }} | sed 's#/##')
-          echo "Changed directory: $CHANGED_DIR"
-          LAMBDA_NAME=$(echo $MAP | jq -r ".${CHANGED_DIR}")
-          if [ -z "$LAMBDA_NAME" ]; then
-            echo "Error: Lambda mapping for directory '$CHANGED_DIR' not found."
-            exit 1
-          fi
+          changed_dir=$(echo ${{ env.changed_dirs }} | tr -d '/')
+          LAMBDA_NAME=$(echo $MAP | jq -r ".$changed_dir")
           echo "lambda_name=${LAMBDA_NAME}" >> $GITHUB_ENV
-
-      - name: Debug Variables
-        run: |
-          echo "Changed directory: ${{ env.changed_dirs }}"
-          echo "Lambda name: ${{ env.lambda_name }}"
 
       - name: Set up Java
         uses: actions/setup-java@v3
@@ -53,13 +45,12 @@ jobs:
           java-version: "21"
 
       - name: Build with Maven
-        run: mvn clean package -DskipTests
         working-directory: ${{ env.changed_dirs }}
+        run: mvn clean package -DskipTests
 
       - name: Zip artifact
-        run: |
-          zip -j lambda-artifact.zip target/*.jar
         working-directory: ${{ env.changed_dirs }}
+        run: zip -j lambda-artifact.zip target/*.jar
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v2
@@ -68,8 +59,8 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: sa-east-1
 
-      - name: Update Lambda Function
+      - name: Update Lambda function
         run: |
           aws lambda update-function-code \
             --function-name ${{ env.lambda_name }} \
-            --zip-file fileb://lambda-artifact.zip
+            --zip-file fileb://${{ env.changed_dirs }}/lambda-artifact.zip
