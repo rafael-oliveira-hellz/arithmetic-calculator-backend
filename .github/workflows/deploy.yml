@@ -24,8 +24,8 @@ jobs:
       - name: Identify changed directory
         id: detect-dir
         run: |
-          changed_dirs=$(git diff --name-only HEAD~1 HEAD | grep -oE '^calculator[^/]+/' | sort -u | head -n 1)
-          echo "changed_dirs=$changed_dirs" >> $GITHUB_ENV
+          changed_dirs=$(git diff --name-only origin/master HEAD | grep -oE '^calculator[^/]+/' | sort -u | head -n 1)
+          echo "changed_dirs=${changed_dirs}" >> $GITHUB_ENV
 
       - name: Validate JSON mapping
         run: jq . lambda-mapping.json > /dev/null
