@@ -21,10 +21,23 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
+      - name: Debug changed files and directories
+        run: |
+          echo "Current branch: $(git branch --show-current)"
+          echo "Files changed between origin/master and HEAD:"
+          git diff --name-only origin/master HEAD
+          changed_dirs=$(git diff --name-only origin/master HEAD | grep -oE '^calculator[^/]+' | sort -u)
+          echo "Detected changed directories: ${changed_dirs}"
+          if [ -z "$changed_dirs" ]; then
+            echo "No directories detected. Exiting."
+            exit 1
+          fi
+          echo "changed_dirs=${changed_dirs}" >> $GITHUB_ENV
+
       - name: Identify changed directories
         id: detect-dir
         run: |
-          changed_dirs=$(git diff --name-only origin/master HEAD | grep -oE '^calculator[^/]+/' | sort -u)
+          changed_dirs=$(git diff --name-only origin/master HEAD | grep -oE '^calculator[^/]+' | sort -u)
           echo "changed_dirs=${changed_dirs}" >> $GITHUB_ENV
           echo "Detected changed directories: ${changed_dirs}"
 
@@ -49,6 +62,11 @@ jobs:
         run: |
           echo "Changed directory: ${{ env.changed_dir }}"
           echo "Lambda function: ${{ env.lambda_name }}"
+
+      - name: Force a changed directory for testing
+        run: |
+          echo "Forcing changed_dirs to calculatorLogout/"
+          echo "changed_dirs=calculatorLogout/" >> $GITHUB_ENV
 
       - name: Set up Java
         uses: actions/setup-java@v3
