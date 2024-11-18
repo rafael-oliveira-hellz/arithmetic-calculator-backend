@@ -69,6 +69,15 @@ jobs:
         working-directory: ${{ env.changed_dir }}
         run: mvn clean package -DskipTests
 
+      - name: List files in target directory and capture ZIP name
+        working-directory: ${{ env.changed_dir }}
+        run: |
+          echo "Listing files in target directory:"
+          ls -l target/
+          ZIP_FILE=$(ls target/*.zip | head -n 1)
+          echo "Detected ZIP file: ${ZIP_FILE}"
+          echo "zip_file=${ZIP_FILE}" >> $GITHUB_ENV
+
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
@@ -78,6 +87,10 @@ jobs:
 
       - name: Deploy Lambda function
         run: |
+          if [ -z "${{ env.zip_file }}" ]; then
+            echo "No ZIP file found. Exiting."
+            exit 1
+          fi
           aws lambda update-function-code \
             --function-name ${{ env.lambda_name }} \
-            --zip-file fileb://calculator-1.0-SNAPSHOT-lambda-package.zip
+            --zip-file fileb://${{ env.zip_file }}
