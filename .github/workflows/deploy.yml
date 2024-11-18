@@ -1,4 +1,4 @@
-name: Build and Deploy Lambdas
+name: Deploy Lambda
 
 on:
   push:
@@ -24,16 +24,27 @@ jobs:
       - name: Identify changed directory
         id: detect-dir
         run: |
-          changed_dirs=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -oE '^calculator[^/]+/' | sort -u | sed 's:/$::')
-          echo "changed_dir=${changed_dirs}" >> $GITHUB_ENV
+          changed_dirs=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -oE '^calculator[^/]+/' | sort -u)
+          echo "changed_dirs=$changed_dirs" >> $GITHUB_ENV
 
       - name: Load Lambda Mapping
         id: load-mapping
         run: |
           MAP=$(cat lambda-mapping.json)
-          echo "Mapping: $MAP" 
-          LAMBDA_NAME=$(echo $MAP | jq -r ".${{ env.changed_dir }}")
+          echo "Mapping loaded: $MAP"
+          CHANGED_DIR=$(echo ${{ env.changed_dirs }} | sed 's#/##')
+          echo "Changed directory: $CHANGED_DIR"
+          LAMBDA_NAME=$(echo $MAP | jq -r ".${CHANGED_DIR}")
+          if [ -z "$LAMBDA_NAME" ]; then
+            echo "Error: Lambda mapping for directory '$CHANGED_DIR' not found."
+            exit 1
+          fi
           echo "lambda_name=${LAMBDA_NAME}" >> $GITHUB_ENV
+
+      - name: Debug Variables
+        run: |
+          echo "Changed directory: ${{ env.changed_dirs }}"
+          echo "Lambda name: ${{ env.lambda_name }}"
 
       - name: Set up Java
         uses: actions/setup-java@v3
@@ -42,9 +53,13 @@ jobs:
           java-version: "21"
 
       - name: Build with Maven
-        working-directory: ${{ env.changed_dir }}
+        run: mvn clean package -DskipTests
+        working-directory: ${{ env.changed_dirs }}
+
+      - name: Zip artifact
         run: |
-          mvn clean package -DskipTests -DfinalName=${{ env.changed_dir }}-artifact
+          zip -j lambda-artifact.zip target/*.jar
+        working-directory: ${{ env.changed_dirs }}
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v2
@@ -53,12 +68,8 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: sa-east-1
 
-      - name: Zip the artifact
-        working-directory: ${{ env.changed_dir }}
-        run: zip -j ../${{ env.changed_dir }}-artifact.zip target/${{ env.changed_dir }}-artifact.jar
-
-      - name: Update Lambda function
+      - name: Update Lambda Function
         run: |
           aws lambda update-function-code \
             --function-name ${{ env.lambda_name }} \
-            --zip-file fileb://${{ env.changed_dir }}-artifact.zip
+            --zip-file fileb://lambda-artifact.zip
