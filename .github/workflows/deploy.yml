@@ -26,7 +26,7 @@ jobs:
       - name: Identify changed directories
         id: detect-dir
         run: |
-          git fetch --prune --unshallow
+          git fetch --prune --tags
           changed_dirs=$(git diff --name-only origin/master~1 HEAD | grep -oE '^calculator[^/]+' | sort -u)
           if [ -z "$changed_dirs" ]; then
             echo "No directories detected. Exiting."
