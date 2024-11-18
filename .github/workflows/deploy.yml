@@ -21,10 +21,10 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Identify changed directory
+      - name: Identify changed directories
         id: detect-dir
         run: |
-          changed_dirs=$(git diff --name-only origin/master HEAD | grep -oE '^calculator[^/]+/' | sort -u | head -n 1)
+          changed_dirs=$(git diff --name-only origin/master HEAD | grep -oE '^calculator[^/]+/' | sort -u)
           echo "changed_dirs=${changed_dirs}" >> $GITHUB_ENV
 
       - name: Validate JSON mapping
@@ -34,9 +34,20 @@ jobs:
         id: load-mapping
         run: |
           MAP=$(cat lambda-mapping.json)
-          changed_dir=$(echo ${{ env.changed_dirs }} | tr -d '/')
-          LAMBDA_NAME=$(echo $MAP | jq -r ".${changed_dir}")
-          echo "lambda_name=${LAMBDA_NAME}" >> $GITHUB_ENV
+          for dir in ${{ env.changed_dirs }}; do
+            clean_dir=$(echo $dir | tr -d '/')
+            LAMBDA_NAME=$(echo $MAP | jq -r ".${clean_dir}")
+            if [ "$LAMBDA_NAME" != "null" ]; then
+              echo "lambda_name=${LAMBDA_NAME}" >> $GITHUB_ENV
+              echo "changed_dir=${dir}" >> $GITHUB_ENV
+              break
+            fi
+          done
+
+      - name: Debug changed directory and Lambda function
+        run: |
+          echo "Changed directory: ${{ env.changed_dir }}"
+          echo "Lambda function: ${{ env.lambda_name }}"
 
       - name: Set up Java
         uses: actions/setup-java@v3
@@ -45,12 +56,12 @@ jobs:
           java-version: "21"
 
       - name: Build with Maven
-        working-directory: ${{ env.changed_dirs }}
+        working-directory: ${{ env.changed_dir }}
         run: mvn clean package -DskipTests
 
       - name: Zip the Lambda artifact
         run: |
-          zip -j lambda-artifact.zip ${{ env.changed_dirs }}/target/*.jar
+          zip -j lambda-artifact.zip ${{ env.changed_dir }}/target/*.jar
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v2
