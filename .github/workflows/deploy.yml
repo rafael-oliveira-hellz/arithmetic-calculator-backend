@@ -69,7 +69,7 @@ jobs:
         working-directory: ${{ env.changed_dir }}
         run: |
           mvn clean package -DskipTests
-          zip -j lambda-artifact.zip target/*.jar
+          zip -j lambda-artifact.zip ${{ env.changed_dir }}/target/*.jar
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v2
