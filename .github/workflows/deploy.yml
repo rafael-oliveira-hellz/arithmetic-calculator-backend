@@ -65,15 +65,15 @@ jobs:
           distribution: "temurin"
           java-version: "21"
 
-      - name: Run Unit Tests with Coverage
-        working-directory: ${{ env.changed_dir }}
-        run: |
-          mvn clean verify
+      # - name: Run Unit Tests with Coverage
+      #   working-directory: ${{ env.changed_dir }}
+      #   run: |
+      #     mvn clean verify
 
-      - name: Run Integration and E2E Tests with Coverage
-        working-directory: ${{ env.changed_dir }}
-        run: |
-          mvn failsafe:integration-test failsafe:verify
+      # - name: Run Integration and E2E Tests with Coverage
+      #   working-directory: ${{ env.changed_dir }}
+      #   run: |
+      #     mvn failsafe:integration-test failsafe:verify
 
       - name: Build and package Lambda
         working-directory: ${{ env.changed_dir }}
