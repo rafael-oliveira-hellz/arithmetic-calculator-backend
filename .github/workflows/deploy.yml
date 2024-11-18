@@ -26,7 +26,8 @@ jobs:
       - name: Identify changed directory
         id: detect-dir
         run: |
-          echo "changed_dir=$(echo ${{ github.event.head_commit.message }} | grep -o 'backend[0-9]*')" >> $GITHUB_ENV
+          changed_dirs=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -oE '^calculator[^/]+/' | sort -u)
+          echo "changed_dirs=$changed_dirs" >> $GITHUB_ENV
 
       # Step 3: Carregar o mapeamento do lambda
       - name: Load Lambda Mapping
