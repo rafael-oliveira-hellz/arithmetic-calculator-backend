@@ -21,21 +21,21 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Install jq
-        run: sudo apt-get install jq
-
       - name: Identify changed directory
         id: detect-dir
         run: |
-          changed_dirs=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -oE '^calculator[^/]+/' | sort -u)
+          changed_dirs=$(git diff --name-only HEAD~1 HEAD | grep -oE '^calculator[^/]+/' | sort -u | head -n 1)
           echo "changed_dirs=$changed_dirs" >> $GITHUB_ENV
+
+      - name: Validate JSON mapping
+        run: jq . lambda-mapping.json > /dev/null
 
       - name: Load Lambda Mapping
         id: load-mapping
         run: |
           MAP=$(cat lambda-mapping.json)
           changed_dir=$(echo ${{ env.changed_dirs }} | tr -d '/')
-          LAMBDA_NAME=$(echo $MAP | jq -r ".$changed_dir")
+          LAMBDA_NAME=$(echo $MAP | jq -r ".${changed_dir}")
           echo "lambda_name=${LAMBDA_NAME}" >> $GITHUB_ENV
 
       - name: Set up Java
@@ -48,9 +48,9 @@ jobs:
         working-directory: ${{ env.changed_dirs }}
         run: mvn clean package -DskipTests
 
-      - name: Zip artifact
-        working-directory: ${{ env.changed_dirs }}
-        run: zip -j lambda-artifact.zip target/*.jar
+      - name: Zip the Lambda artifact
+        run: |
+          zip -j lambda-artifact.zip ${{ env.changed_dirs }}/target/*.jar
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v2
@@ -63,4 +63,4 @@ jobs:
         run: |
           aws lambda update-function-code \
             --function-name ${{ env.lambda_name }} \
-            --zip-file fileb://${{ env.changed_dirs }}/lambda-artifact.zip
+            --zip-file fileb://lambda-artifact.zip
