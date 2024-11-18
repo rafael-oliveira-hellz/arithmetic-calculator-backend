@@ -21,11 +21,14 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
+      - name: Fetch all branches
+        run: git fetch --prune --unshallow --tags
+
       - name: Debug changed files and directories
         run: |
           echo "Current branch: $(git branch --show-current)"
           echo "Files changed between origin/master and HEAD:"
-          git diff --name-only origin/master HEAD
+          git diff --name-only origin/master HEAD || echo "No files changed"
           changed_dirs=$(git diff --name-only origin/master HEAD | grep -oE '^calculator[^/]+' | sort -u)
           echo "Detected changed directories: ${changed_dirs}"
           if [ -z "$changed_dirs" ]; then
