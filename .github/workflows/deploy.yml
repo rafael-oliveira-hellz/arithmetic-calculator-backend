@@ -87,10 +87,11 @@ jobs:
 
       - name: Deploy Lambda function
         run: |
+          echo ${{ env.changed_dir }}/${{ env.zip_file }}
           if [ -z "${{ env.zip_file }}" ]; then
             echo "No ZIP file found. Exiting."
             exit 1
           fi
           aws lambda update-function-code \
             --function-name ${{ env.lambda_name }} \
-            --zip-file fileb://${{ env.zip_file }}
+            --zip-file fileb://${{ env.changed_dir }}/${{ env.zip_file }}
