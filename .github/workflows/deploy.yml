@@ -79,7 +79,10 @@ jobs:
 
       - name: Build with Maven
         working-directory: ${{ env.changed_dir }}
-        run: mvn clean package -DskipTests
+        run: |
+          echo "Entering directory: ${{ env.changed_dirs }}"
+          cd ${{ env.changed_dirs }}
+          mvn clean package -DskipTests
 
       - name: Zip the Lambda artifact
         run: |
