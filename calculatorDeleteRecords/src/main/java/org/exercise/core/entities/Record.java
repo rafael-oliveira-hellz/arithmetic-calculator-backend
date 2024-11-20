@@ -16,16 +16,24 @@ import java.util.UUID;
 public class Record {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID id;
-    @OneToOne(targetEntity = Operation.class)
-    private Operation operation;
-    @OneToOne(targetEntity = User.class)
-    private User user;
-    private Integer amount;
-    private Integer userBalance;
-    private String operationResponse;
-    private ZonedDateTime date;
-    private Boolean deleted;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "operation_id", nullable = false)
+    private Operation operation;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
+
+    private Integer amount;
+
+    private Integer userBalance;
+
+    private String operationResponse;
+
+    private ZonedDateTime date = ZonedDateTime.now();
+
+    private Boolean deleted;
 }
+

@@ -1,4 +1,4 @@
-package org.exercise.core.config;
+package org.exercise.config;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -16,8 +16,8 @@ public class CognitoConfig {
     @Bean
     public CognitoIdentityProviderClient cognitoClient() {
         return CognitoIdentityProviderClient.builder()
-                .region(Region.of(region))
                 .credentialsProvider(DefaultCredentialsProvider.create())
+                .region(Region.of(region))
                 .build();
     }
 }

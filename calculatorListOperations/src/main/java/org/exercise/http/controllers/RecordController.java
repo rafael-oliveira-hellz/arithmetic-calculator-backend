@@ -23,7 +23,7 @@ public class RecordController {
     }
 
     @GetMapping("/operations")
-    public ResponseEntity<List<Operation>> getRecords() {
+    public ResponseEntity<List<Operation>> getOperations() {
         List<Operation> operations = operationService.getOperations();
         return ResponseEntity.ok(operations);
     }

@@ -17,8 +17,8 @@ public class Balance {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID id;
-    @OneToOne(mappedBy = "balance", cascade = CascadeType.ALL)
-    private User user;
+
+    @Column(nullable = false)
     private Integer amount;
 
     public Balance(Integer amount) {

@@ -13,7 +13,7 @@ public class CognitoAuthServiceImpl implements CognitoAuthService {
      * @param clientId
      * @param clientSecret
      * @param username
-     * @return
+     * @return generated secret hash for incognito
      */
     @Override
     public String calculateSecretHash(String clientId, String clientSecret, String username) {

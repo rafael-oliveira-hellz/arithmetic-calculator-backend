@@ -9,12 +9,12 @@ public record Register(String username, String password, String email) {
             "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}(\\.[A-Za-z]{2,})?$"
     );
 
-    private static final String PASSWORD_MIN_LENGTH_ERROR = "Mínimo de 8 caracteres";
-    private static final String PASSWORD_UPPERCASE_ERROR = "Pelo menos uma letra maiúscula";
-    private static final String PASSWORD_LOWERCASE_ERROR = "Pelo menos uma letra minúscula";
-    private static final String PASSWORD_NUMBER_ERROR = "Pelo menos um número";
-    private static final String PASSWORD_SPECIAL_CHAR_ERROR = "Pelo menos um caractere especial";
-    private static final String PASSWORD_NO_SPACES_OR_ACCENTED_ERROR = "Não conter espaços ou caracteres acentuados";
+    private static final String PASSWORD_MIN_LENGTH_ERROR = "8 characters minimum";
+    private static final String PASSWORD_UPPERCASE_ERROR = "At least one capital letter";
+    private static final String PASSWORD_LOWERCASE_ERROR = "At least one lowercase letter";
+    private static final String PASSWORD_NUMBER_ERROR = "At least one number";
+    private static final String PASSWORD_SPECIAL_CHAR_ERROR = "At least one symbol";
+    private static final String PASSWORD_NO_SPACES_OR_ACCENTED_ERROR = "No spaces or accented letters";
 
     public Register {
         validateEmail(email);
@@ -23,16 +23,16 @@ public record Register(String username, String password, String email) {
 
     private static void validateEmail(String email) {
         if (email == null || email.isBlank()) {
-            throw new UnprocessableEntityException("O email não pode ser nulo ou vazio.");
+            throw new UnprocessableEntityException("Email can't be null nor empty");
         }
         if (!EMAIL_PATTERN.matcher(email).matches()) {
-            throw new UnprocessableEntityException("O email não está em um formato válido.");
+            throw new UnprocessableEntityException("Email format invalid.");
         }
     }
 
     private static void validatePassword(String password) {
         if (password == null || password.isBlank()) {
-            throw new UnprocessableEntityException("A senha não pode ser nula ou vazia.");
+            throw new UnprocessableEntityException("Password can't be null nor empty.");
         }
 
         if (password.length() < 8) {

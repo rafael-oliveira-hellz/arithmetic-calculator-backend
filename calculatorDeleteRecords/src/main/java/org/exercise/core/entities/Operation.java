@@ -6,6 +6,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.exercise.core.enums.OperationType;
 
+import java.util.UUID;
+
 @Getter
 @Setter
 @Entity
@@ -14,9 +16,10 @@ import org.exercise.core.enums.OperationType;
 public class Operation {
 
     @Id
-    @Column(nullable = false, columnDefinition = "TINYINT UNSIGNED")
-    private Integer id;
-    private OperationType type;
-    private Integer cost;
+    private UUID id;
 
+    @Enumerated(EnumType.STRING)
+    private OperationType type;
+
+    private Integer cost;
 }

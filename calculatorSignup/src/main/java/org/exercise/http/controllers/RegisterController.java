@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 public class RegisterController {
 
     private final UserService userService;
+    public record Response(String message) {}
 
     @GetMapping("/check-status")
     public ResponseEntity<String> checkStatus() {
@@ -21,8 +22,8 @@ public class RegisterController {
     }
 
     @PostMapping("/signup")
-    public ResponseEntity<String> registerUser(@RequestBody @Valid Register dto) {
-            userService.registerUser(dto);
-            return new ResponseEntity<>("User created successfully!", HttpStatus.CREATED);
+    public ResponseEntity<Response> registerUser(@RequestBody @Valid Register dto) {
+        userService.registerUser(dto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(new Response("User created successfully!"));
     }
 }

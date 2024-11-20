@@ -1,4 +1,6 @@
 package org.exercise.core.dtos;
 
-public record AuthResponse(String id, String username, String email, Boolean active, Integer balance, String accessToken) {
+import java.util.UUID;
+
+public record AuthResponse(UUID id, String username, String email, Boolean active, Integer balance, String accessToken) {
 }

@@ -7,6 +7,13 @@ import lombok.Setter;
 
 import java.util.UUID;
 
+import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+import java.util.UUID;
+
 @Getter
 @Setter
 @Entity
@@ -15,10 +22,16 @@ import java.util.UUID;
 public class Balance {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID id;
-    @OneToOne(mappedBy = "balance", cascade = CascadeType.ALL)
-    private User user;
-    private Integer amount;
 
+    @OneToOne(mappedBy = "balance", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private User user;
+
+    @Column(nullable = false)
+    private Integer amount = 100;
+
+    public Balance(Integer amount) {
+        this.amount = amount;
+    }
 }

@@ -15,10 +15,10 @@ import java.util.UUID;
 public class Balance {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private UUID id;
-    @OneToOne(mappedBy = "balance", cascade = CascadeType.ALL)
-    private User user;
-    private Integer amount;
 
+    @OneToOne(mappedBy = "balance", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private User user;
+
+    private Integer amount;
 }

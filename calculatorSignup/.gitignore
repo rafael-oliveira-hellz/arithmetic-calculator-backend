@@ -41,4 +41,6 @@ build/
 /.idea/encodings.xml
 /.idea/misc.xml
 /.env
+/.idea/workspace.xml
 /.idea/uiDesigner.xml
+/htmlReport/

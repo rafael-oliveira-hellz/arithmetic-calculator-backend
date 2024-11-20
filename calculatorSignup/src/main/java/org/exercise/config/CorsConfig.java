@@ -14,13 +14,12 @@ public class CorsConfig {
 
     @Bean
     public WebMvcConfigurer corsConfigurer() {
-        // 
         return new WebMvcConfigurer() {
             @Override
             public void addCorsMappings(@NonNull CorsRegistry registry) {
                 registry.addMapping("/**")
-                        .allowedOrigins(backendUrl, frontendUrl, "https://master.d27of28go3zwq8.amplifyapp.com")
-                        .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+                        .allowedOrigins(backendUrl, frontendUrl)
+                        .allowedMethods("POST", "OPTIONS")
                         .allowedHeaders("*")
                         .allowCredentials(true);
             }

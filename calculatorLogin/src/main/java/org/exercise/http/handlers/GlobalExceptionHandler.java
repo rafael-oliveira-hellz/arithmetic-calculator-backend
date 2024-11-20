@@ -3,6 +3,7 @@ package org.exercise.http.handlers;
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.exercise.core.exceptions.InternalErrorException;
+import org.exercise.core.exceptions.LoginFailedException;
 import org.exercise.core.exceptions.NotFoundException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
@@ -39,6 +40,11 @@ public class GlobalExceptionHandler {
     @ExceptionHandler({HttpRequestMethodNotSupportedException.class})
     public ResponseEntity<String> methodNotAllowed(Exception ex , HttpServletRequest request) {
         return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).body(ex.getLocalizedMessage());
+    }
+
+    @ExceptionHandler({LoginFailedException.class})
+    public ResponseEntity<String> loginFailed(Exception ex , HttpServletRequest request) {
+        return ResponseEntity.status(HttpStatus.BAD_GATEWAY).body(ex.getLocalizedMessage());
     }
 
     @ExceptionHandler({DataIntegrityViolationException.class})

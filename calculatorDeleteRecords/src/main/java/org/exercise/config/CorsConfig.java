@@ -19,7 +19,7 @@ public class CorsConfig {
             public void addCorsMappings(@NonNull CorsRegistry registry) {
                 registry.addMapping("/**")
                         .allowedOrigins(backendUrl, frontendUrl)
-                        .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+                        .allowedMethods("DELETE", "OPTIONS")
                         .allowedHeaders("*")
                         .allowCredentials(true);
             }

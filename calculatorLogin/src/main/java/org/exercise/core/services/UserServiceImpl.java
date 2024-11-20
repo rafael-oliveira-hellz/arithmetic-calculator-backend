@@ -9,6 +9,8 @@ import org.exercise.core.exceptions.NotFoundException;
 import org.exercise.core.interfaces.CognitoAuthService;
 import org.exercise.core.interfaces.UserService;
 import org.exercise.infrastructure.persistence.UserRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.auth0.jwt.interfaces.DecodedJWT;
@@ -20,9 +22,9 @@ import software.amazon.awssdk.services.cognitoidentityprovider.model.CognitoIden
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 @Service
-@Slf4j
 public class UserServiceImpl implements UserService {
     private static final String CLIENT_ID = System.getenv("COGNITO_CLIENT_ID");
     private static final String CLIENT_SECRET = System.getenv("COGNITO_CLIENT_SECRET");
@@ -32,6 +34,8 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final CognitoAuthService cognitoAuthService;
 
+    private static final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
+
     @Autowired
     public UserServiceImpl(UserRepository userRepository, CognitoIdentityProviderClient cognitoClient, CognitoAuthService cognitoAuthService) {
         this.cognitoClient = cognitoClient;
@@ -40,12 +44,14 @@ public class UserServiceImpl implements UserService {
     }
 
     public AuthResponse authenticate(String username, String password) {
+        logger.info("Setting authentication params for user : {}", username);
         Map<String, String> authParams = new HashMap<>();
         authParams.put("USERNAME", username);
         authParams.put("PASSWORD", password);
         authParams.put("SECRET_HASH", cognitoAuthService.calculateSecretHash(CLIENT_ID, CLIENT_SECRET, username));
 
         try {
+            logger.info("Building authentication request");
             AdminInitiateAuthRequest authRequest = AdminInitiateAuthRequest.builder()
                     .userPoolId(POOL_ID)
                     .clientId(CLIENT_ID)
@@ -53,13 +59,17 @@ public class UserServiceImpl implements UserService {
                     .authParameters(authParams)
                     .build();
 
-            String idToken = getAccessToken(authRequest);
-            User user = getUserById(idToken);
+            logger.info("Authenticating user at cognito");
+            String accessToken = getAccessToken(authRequest);
 
+            logger.info("Authentication successful. Access token retrieved");
+            User user = getUserById(accessToken);
+
+            logger.info("User found. Username: {}", user.getUsername());
             return new AuthResponse(user.getId(), user.getUsername(), user.getEmail(), user.getActive(),
-                    user.getBalance().getAmount(), idToken);
+                    user.getBalance().getAmount(), accessToken);
         } catch (CognitoIdentityProviderException e) {
-            log.error("Error during authentication for user {}: {}", username, e.awsErrorDetails().errorMessage());
+            logger.error("Error during authentication for user {}: {}", username, e.awsErrorDetails().errorMessage());
             throw new LoginFailedException("Authentication failed: " + e.awsErrorDetails().errorMessage());
         }
     }
@@ -70,8 +80,10 @@ public class UserServiceImpl implements UserService {
     }
 
     private User getUserById(String idToken) {
+        logger.info("Retrieving user id from access token");
         DecodedJWT jwt = JWT.decode(idToken);
-        String userId = jwt.getClaim("sub").asString();
+        UUID userId = jwt.getClaim("sub").as(UUID.class);
+        logger.info("User id found: {}", userId);
         return userRepository.findById(userId).orElseThrow(() -> new NotFoundException("User was not found"));
     }
 }

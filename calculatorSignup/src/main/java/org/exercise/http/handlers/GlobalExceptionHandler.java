@@ -2,6 +2,7 @@ package org.exercise.http.handlers;
 
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import jakarta.servlet.http.HttpServletRequest;
+import org.exercise.core.exceptions.BadGatewayException;
 import org.exercise.core.exceptions.IllegalArgumentException;
 import org.exercise.core.exceptions.InternalErrorException;
 import org.exercise.core.exceptions.UnprocessableEntityException;
@@ -29,6 +30,11 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<String> handleInternalErrorException(IllegalArgumentException ex) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
+    }
+
+    @ExceptionHandler(BadGatewayException.class)
+    public ResponseEntity<String> badGatewayException(BadGatewayException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_GATEWAY).body(ex.getMessage());
     }
 
     @ExceptionHandler({UnprocessableEntityException.class})
@@ -65,7 +71,7 @@ public class GlobalExceptionHandler {
                 .body("An unexpected error occurred: " + ex.getLocalizedMessage());
     }
 
-    private String getConstraintDefaultMessage(Exception ex) {
+    String getConstraintDefaultMessage(Exception ex) {
         String errorMessage = ex.getLocalizedMessage();
         String startTag = "]]; default message [";
         String endTag = "]";
