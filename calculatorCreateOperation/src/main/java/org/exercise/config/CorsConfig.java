@@ -19,8 +19,9 @@ public class CorsConfig {
             public void addCorsMappings(@NonNull CorsRegistry registry) {
                 registry.addMapping("/**")
                         .allowedOrigins(backendUrl, frontendUrl, "http://localhost:3000")
-                        .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+                        .allowedMethods("POST", "OPTIONS")
                         .allowedHeaders("Content-Type", "Authorization", "accessToken")
+                        .exposedHeaders("Authorization", "accessToken")
                         .allowCredentials(true);
             }
         };

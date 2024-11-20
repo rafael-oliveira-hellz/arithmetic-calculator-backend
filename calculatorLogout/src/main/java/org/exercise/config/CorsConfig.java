@@ -18,10 +18,11 @@ public class CorsConfig {
             @Override
             public void addCorsMappings(@NonNull CorsRegistry registry) {
                 registry.addMapping("/**")
-                        .allowedOrigins(backendUrl, frontendUrl)
-                        .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
-                        .allowedHeaders("*")
-                        .allowCredentials(true);
+                        .allowedOrigins(backendUrl, frontendUrl, "http://localhost:3000") 
+                        .allowedMethods("POST","OPTIONS")
+                        .allowedHeaders("Content-Type", "Authorization", "accessToken") 
+                        .exposedHeaders("Authorization", "accessToken") 
+                        .allowCredentials(true); 
             }
         };
     }
