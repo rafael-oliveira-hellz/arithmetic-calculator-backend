@@ -7,6 +7,6 @@ import org.springframework.stereotype.Service;
 @Service
 public interface RecordService {
 
-    public Page<Record> getRecords(String token, Integer page, Integer size);
+    public Page<Record> getRecords(String token, Integer page, Integer size, String orderedBY);
 
 }

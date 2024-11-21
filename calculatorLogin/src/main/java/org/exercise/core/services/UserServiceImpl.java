@@ -84,7 +84,7 @@ public class UserServiceImpl implements UserService {
         DecodedJWT jwt = JWT.decode(idToken);
         UUID userId = jwt.getClaim("sub").as(UUID.class);
         logger.info("User id found: {}", userId);
-        return userRepository.findById(userId).orElseThrow(() -> new NotFoundException("User was not found"));
+        return userRepository.findByIdAndActive(userId, true).orElseThrow(() -> new NotFoundException("User was not found"));
     }
 }
 

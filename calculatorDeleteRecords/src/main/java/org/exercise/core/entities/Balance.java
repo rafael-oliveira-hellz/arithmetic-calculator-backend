@@ -17,8 +17,5 @@ public class Balance {
     @Id
     private UUID id;
 
-    @OneToOne(mappedBy = "balance", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private User user;
-
     private Integer amount;
 }

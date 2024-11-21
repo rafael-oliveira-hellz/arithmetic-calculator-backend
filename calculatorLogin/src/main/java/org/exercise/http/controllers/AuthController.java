@@ -2,10 +2,9 @@ package org.exercise.http.controllers;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.exercise.core.dtos.AuthDto;
 import org.exercise.core.dtos.AuthResponse;
 import org.exercise.core.interfaces.UserService;
-import org.exercise.core.services.UserServiceImpl;
-import org.exercise.core.dtos.AuthDto;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 

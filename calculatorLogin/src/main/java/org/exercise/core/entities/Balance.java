@@ -25,9 +25,6 @@ public class Balance {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID id;
 
-    @OneToOne(mappedBy = "balance", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private User user;
-
     @Column(nullable = false)
     private Integer amount = 100;
 

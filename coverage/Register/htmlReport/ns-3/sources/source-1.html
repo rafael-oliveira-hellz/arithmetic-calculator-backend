@@ -1,0 +1,174 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > Register</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.exercise.core.dtos</a>
+</div>
+
+<h1>Coverage Summary for Class: Register (org.exercise.core.dtos)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">Register</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (5/5)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (22/22)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (23/23)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package org.exercise.core.dtos;
+&nbsp;import org.exercise.core.exceptions.UnprocessableEntityException;
+&nbsp;
+&nbsp;import java.util.regex.Pattern;
+&nbsp;
+<b class="fc">&nbsp;public record Register(String username, String password, String email) {</b>
+&nbsp;
+<b class="fc">&nbsp;    private static final Pattern EMAIL_PATTERN = Pattern.compile(</b>
+&nbsp;            &quot;^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}(\\.[A-Za-z]{2,})?$&quot;
+&nbsp;    );
+&nbsp;
+&nbsp;    private static final String PASSWORD_MIN_LENGTH_ERROR = &quot;8 characters minimum&quot;;
+&nbsp;    private static final String PASSWORD_UPPERCASE_ERROR = &quot;At least one capital letter&quot;;
+&nbsp;    private static final String PASSWORD_LOWERCASE_ERROR = &quot;At least one lowercase letter&quot;;
+&nbsp;    private static final String PASSWORD_NUMBER_ERROR = &quot;At least one number&quot;;
+&nbsp;    private static final String PASSWORD_SPECIAL_CHAR_ERROR = &quot;At least one symbol&quot;;
+&nbsp;    private static final String PASSWORD_NO_SPACES_OR_ACCENTED_ERROR = &quot;No spaces or accented letters&quot;;
+&nbsp;
+<b class="fc">&nbsp;    public Register {</b>
+<b class="fc">&nbsp;        validateEmail(email);</b>
+<b class="fc">&nbsp;        validatePassword(password);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private static void validateEmail(String email) {
+<b class="fc">&nbsp;        if (email == null || email.isBlank()) {</b>
+<b class="fc">&nbsp;            throw new UnprocessableEntityException(&quot;Email can&#39;t be null nor empty&quot;);</b>
+&nbsp;        }
+<b class="fc">&nbsp;        if (!EMAIL_PATTERN.matcher(email).matches()) {</b>
+<b class="fc">&nbsp;            throw new UnprocessableEntityException(&quot;Email format invalid.&quot;);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private static void validatePassword(String password) {
+<b class="fc">&nbsp;        if (password == null || password.isBlank()) {</b>
+<b class="fc">&nbsp;            throw new UnprocessableEntityException(&quot;Password can&#39;t be null nor empty.&quot;);</b>
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        if (password.length() &lt; 8) {</b>
+<b class="fc">&nbsp;            throw new UnprocessableEntityException(PASSWORD_MIN_LENGTH_ERROR);</b>
+&nbsp;        }
+<b class="fc">&nbsp;        if (!Pattern.compile(&quot;[A-Z]&quot;).matcher(password).find()) {</b>
+<b class="fc">&nbsp;            throw new UnprocessableEntityException(PASSWORD_UPPERCASE_ERROR);</b>
+&nbsp;        }
+<b class="fc">&nbsp;        if (!Pattern.compile(&quot;[a-z]&quot;).matcher(password).find()) {</b>
+<b class="fc">&nbsp;            throw new UnprocessableEntityException(PASSWORD_LOWERCASE_ERROR);</b>
+&nbsp;        }
+<b class="fc">&nbsp;        if (!Pattern.compile(&quot;[0-9]&quot;).matcher(password).find()) {</b>
+<b class="fc">&nbsp;            throw new UnprocessableEntityException(PASSWORD_NUMBER_ERROR);</b>
+&nbsp;        }
+<b class="fc">&nbsp;        if (!Pattern.compile(&quot;[^A-Za-z0-9]&quot;).matcher(password).find()) {</b>
+<b class="fc">&nbsp;            throw new UnprocessableEntityException(PASSWORD_SPECIAL_CHAR_ERROR);</b>
+&nbsp;        }
+<b class="fc">&nbsp;        if (Pattern.compile(&quot;[\\sáàâãäéèêëíìîïóòôõöúùûüçñ]&quot;).matcher(password).find()) {</b>
+<b class="fc">&nbsp;            throw new UnprocessableEntityException(PASSWORD_NO_SPACES_OR_ACCENTED_ERROR);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;}
+&nbsp;
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-11-21 00:56</div>
+</div>
+</body>
+</html>

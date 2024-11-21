@@ -1,0 +1,92 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > OperationRepository</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.exercise.infrastructure.persistence</a>
+</div>
+
+<h1>Coverage Summary for Class: OperationRepository (org.exercise.infrastructure.persistence)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+</tr>
+  <tr>
+    <td class="name">OperationRepository$MockitoMock$el2dEsSz</td>
+  </tr>
+  <tr>
+    <td class="name">OperationRepository$MockitoMock$el2dEsSz$auxiliary$eDxsOnSm</td>
+  </tr>
+  <tr>
+    <td class="name">OperationRepository$MockitoMock$el2dEsSz$auxiliary$ouUi28ES</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package org.exercise.infrastructure.persistence;
+&nbsp;
+&nbsp;import org.exercise.core.entities.Operation;
+&nbsp;import org.exercise.core.enums.OperationType;
+&nbsp;import org.springframework.data.jpa.repository.JpaRepository;
+&nbsp;import org.springframework.stereotype.Repository;
+&nbsp;
+&nbsp;import java.util.Optional;
+&nbsp;import java.util.UUID;
+&nbsp;
+&nbsp;@Repository
+&nbsp;public interface OperationRepository extends JpaRepository&lt;Operation, UUID&gt; {
+&nbsp;
+&nbsp;    Optional&lt;Operation&gt; findByType(OperationType type);
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-11-21 00:55</div>
+</div>
+</body>
+</html>

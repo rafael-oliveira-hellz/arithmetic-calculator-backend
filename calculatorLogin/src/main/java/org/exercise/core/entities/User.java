@@ -35,15 +35,6 @@ public class User {
     @JoinColumn(name = "balance_id", referencedColumnName = "id")
     private Balance balance;
 
-    public User(String username, String password, String email, UUID cognitoUserId) {
-        this.username = username;
-        this.password = password;
-        this.email = email;
-        this.id = cognitoUserId;
-        this.active = true;
-        this.balance.setAmount(Integer.valueOf(System.getenv("AMOUNT")));
-    }
-
     public User(UUID userId, String username, String mail, boolean active, Balance balance) {
         this.id = userId;
         this.username = username;

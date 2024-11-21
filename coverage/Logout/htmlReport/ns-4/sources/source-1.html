@@ -1,0 +1,177 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > UserServiceImpl</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.exercise.core.services</a>
+</div>
+
+<h1>Coverage Summary for Class: UserServiceImpl (org.exercise.core.services)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">UserServiceImpl</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (5/5)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (4/4)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (25/25)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package org.exercise.core.services;
+&nbsp;
+&nbsp;import lombok.RequiredArgsConstructor;
+&nbsp;import org.exercise.config.CognitoConfig;
+&nbsp;import org.exercise.core.exceptions.LogoutException;
+&nbsp;import org.exercise.core.interfaces.UserService;
+&nbsp;import org.slf4j.Logger;
+&nbsp;import org.slf4j.LoggerFactory;
+&nbsp;import org.springframework.stereotype.Service;
+&nbsp;import software.amazon.awssdk.services.cognitoidentityprovider.CognitoIdentityProviderClient;
+&nbsp;import software.amazon.awssdk.services.cognitoidentityprovider.model.CognitoIdentityProviderException;
+&nbsp;import software.amazon.awssdk.services.cognitoidentityprovider.model.GlobalSignOutRequest;
+&nbsp;
+&nbsp;import java.util.function.Supplier;
+&nbsp;
+&nbsp;@Service
+<b class="fc">&nbsp;@RequiredArgsConstructor</b>
+&nbsp;public class UserServiceImpl implements UserService {
+&nbsp;
+<b class="fc">&nbsp;    private static final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);</b>
+&nbsp;
+&nbsp;    private final CognitoConfig cognitoConfig;
+<b class="fc">&nbsp;    private final Supplier&lt;CognitoIdentityProviderClient&gt; cognitoClientSupplier = this::createCognitoClient;</b>
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public void logoutUser(String accessToken) {
+<b class="fc">&nbsp;        logger.info(&quot;Starting logout process for user.&quot;);</b>
+&nbsp;
+&nbsp;        try {
+<b class="fc">&nbsp;            GlobalSignOutRequest signOutRequest = GlobalSignOutRequest.builder()</b>
+<b class="fc">&nbsp;                    .accessToken(accessToken)</b>
+<b class="fc">&nbsp;                    .build();</b>
+&nbsp;
+<b class="fc">&nbsp;            logger.debug(&quot;Sending GlobalSignOutRequest to Cognito.&quot;);</b>
+<b class="fc">&nbsp;            cognitoClientSupplier.get().globalSignOut(signOutRequest);</b>
+<b class="fc">&nbsp;            logger.info(&quot;Logout successful for the user with access token: {}&quot;, maskToken(accessToken));</b>
+<b class="fc">&nbsp;        } catch (CognitoIdentityProviderException e) {</b>
+<b class="fc">&nbsp;            logger.error(&quot;CognitoIdentityProviderException occurred during logout: {}. AWS error details: {}&quot;,</b>
+<b class="fc">&nbsp;                    e.getMessage(), e.awsErrorDetails().errorMessage());</b>
+<b class="fc">&nbsp;            throw new LogoutException(&quot;Logout failed: &quot; + e.awsErrorDetails().errorMessage());</b>
+<b class="fc">&nbsp;        } catch (IllegalStateException e) {</b>
+<b class="fc">&nbsp;            logger.error(&quot;IllegalStateException detected: connection pool might have been shut down. Reinitializing client...&quot;);</b>
+<b class="fc">&nbsp;            throw new LogoutException(&quot;Cognito client is unavailable. Please try again later.&quot;);</b>
+<b class="fc">&nbsp;        } catch (Exception e) {</b>
+<b class="fc">&nbsp;            logger.error(&quot;Unexpected error during logout: {}&quot;, e.getMessage(), e);</b>
+<b class="fc">&nbsp;            throw new LogoutException(&quot;Unexpected error occurred during logout.&quot;);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private CognitoIdentityProviderClient createCognitoClient() {
+<b class="fc">&nbsp;        logger.info(&quot;Initializing Cognito client.&quot;);</b>
+<b class="fc">&nbsp;        return cognitoConfig.cognitoClient();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    String maskToken(String token) {
+<b class="fc">&nbsp;        if (token == null || token.length() &lt; 10) {</b>
+<b class="fc">&nbsp;            return &quot;N/A&quot;;</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return token.substring(0, 5) + &quot;******&quot; + token.substring(token.length() - 5);</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-11-21 00:54</div>
+</div>
+</body>
+</html>

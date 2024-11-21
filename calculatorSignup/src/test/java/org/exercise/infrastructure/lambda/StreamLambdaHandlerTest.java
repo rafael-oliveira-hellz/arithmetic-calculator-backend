@@ -1,54 +1,75 @@
 package org.exercise.infrastructure.lambda;
 
-import com.amazonaws.serverless.proxy.spring.SpringBootLambdaContainerHandler;
+
+import com.amazonaws.serverless.proxy.internal.LambdaContainerHandler;
+import com.amazonaws.serverless.proxy.internal.testutils.AwsProxyRequestBuilder;
+import com.amazonaws.serverless.proxy.internal.testutils.MockLambdaContext;
+import com.amazonaws.serverless.proxy.model.AwsProxyResponse;
 import com.amazonaws.services.lambda.runtime.Context;
-import org.exercise.Application;
-import org.junit.jupiter.api.BeforeEach;
+import jakarta.ws.rs.HttpMethod;
+import jakarta.ws.rs.core.HttpHeaders;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+import org.junit.jupiter.api.Assumptions;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
-import org.mockito.MockedStatic;
-import org.mockito.Mockito;
+import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 @TestInstance(TestInstance.Lifecycle.PER_METHOD)
-@ActiveProfiles("test")
-class StreamLambdaHandlerTest {
+@SpringBootTest
+@ImportAutoConfiguration(exclude = {org.springframework.cloud.function.serverless.web.ServerlessAutoConfiguration.class})
+public class StreamLambdaHandlerTest {
 
-    private StreamLambdaHandler handler;
-    private SpringBootLambdaContainerHandler mockContainerHandler;
+    private static StreamLambdaHandler handler;
+    private static Context lambdaContext;
 
-    @BeforeEach
-    void setUp() {
-        mockContainerHandler = mock(SpringBootLambdaContainerHandler.class);
-        try (MockedStatic<SpringBootLambdaContainerHandler> mockedStatic = Mockito.mockStatic(SpringBootLambdaContainerHandler.class)) {
-            mockedStatic.when(() -> SpringBootLambdaContainerHandler.getAwsProxyHandler(Application.class))
-                    .thenReturn(mockContainerHandler);
-            handler = new StreamLambdaHandler();
-        }
-
-        System.setProperty("jdk.instrument.traceUsage", "false");
-        System.setProperty("jdk.bytebuddy.suppress", "true");
+    @BeforeAll
+    public static void setUp() {
+        System.setProperty("spring.profiles.active", "test");
+        handler = new StreamLambdaHandler();
+        lambdaContext = new MockLambdaContext();
     }
 
     @Test
-    void testHandleRequest_SuccessfulInvocation() throws IOException {
-        // Arrange
-        ByteArrayInputStream inputStream = new ByteArrayInputStream("{}".getBytes());
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        Context mockContext = mock(Context.class);
+    void invalidResource_streamRequest_responds404() {
+        InputStream requestStream = new AwsProxyRequestBuilder("/pong", HttpMethod.GET)
+                                            .header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON)
+                                            .buildStream();
+        ByteArrayOutputStream responseStream = new ByteArrayOutputStream();
 
-        // Act
-        handler.handleRequest(inputStream, outputStream, mockContext);
+        handle(requestStream, responseStream);
 
-        // Assert
-        verify(mockContainerHandler, times(1)).proxyStream(inputStream, outputStream, mockContext);
+        AwsProxyResponse response = readResponse(responseStream);
+        assertNotNull(response);
+        assertEquals(Response.Status.NOT_FOUND.getStatusCode(), response.getStatusCode());
     }
 
+    private void handle(InputStream is, ByteArrayOutputStream os) {
+        try {
+            handler.handleRequest(is, os, lambdaContext);
+        } catch (IOException e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+        }
+    }
+
+    private AwsProxyResponse readResponse(ByteArrayOutputStream responseStream) {
+        try {
+            return LambdaContainerHandler.getObjectMapper().readValue(responseStream.toByteArray(), AwsProxyResponse.class);
+        } catch (IOException e) {
+            e.printStackTrace();
+            fail("Error while parsing response: " + e.getMessage());
+        }
+        return null;
+    }
 
 }

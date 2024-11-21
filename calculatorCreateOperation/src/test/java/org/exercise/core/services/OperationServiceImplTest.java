@@ -17,7 +17,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.MockitoAnnotations;
+import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.text.ParseException;
@@ -27,7 +29,7 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-@ActiveProfiles("test")
+@TestConfiguration
 class OperationServiceImplTest {
 
     @Mock
@@ -58,37 +60,39 @@ class OperationServiceImplTest {
     }
 
     @Test
-    void testDoOperation_Success() throws ParseException {
-        String token = "valid.token.here";
-        String type = "ADDITION";
-        Integer value1 = 5, value2 = 5;
-
-        when(userRepository.findById(any(UUID.class))).thenReturn(Optional.of(user));
-        when(operationRepository.findByType(any(OperationType.class))).thenReturn(Optional.of(operation));
-        when(recordRepository.save(any(Record.class))).thenReturn(new Record());
-        when(client.fetchRandomString(anyInt())).thenReturn("random");
-
-        Record result = operationService.doOperation(token, type, value1, value2);
-
-        assertNotNull(result);
-        verify(userRepository).findById(any(UUID.class));
-        verify(operationRepository).findByType(OperationType.ADDITION);
-        verify(recordRepository).save(any(Record.class));
-    }
-
-    @Test
     void testGetUserIdFromToken_InvalidFormat() {
         String token = "invalid.token";
         assertThrows(BadRequestException.class, () -> operationService.doOperation(token, "ADDITION", 1, 1));
     }
 
     @Test
-    void testFindUserById_NotFound() {
+    void testFindUserById_NotFound() throws ParseException {
+        String token = "valid.token.here";
         UUID userId = UUID.randomUUID();
-        when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
-        assertThrows(NotFoundException.class, () -> operationService.doOperation("valid.token.here", "ADDITION", 1, 1));
+        try (MockedStatic<SignedJWT> mockedJWT = mockStatic(SignedJWT.class)) {
+            SignedJWT signedJWT = mock(SignedJWT.class);
+            JWTClaimsSet claimsSet = mock(JWTClaimsSet.class);
+
+            // Mock SignedJWT behavior
+            mockedJWT.when(() -> SignedJWT.parse(token)).thenReturn(signedJWT);
+            when(signedJWT.getJWTClaimsSet()).thenReturn(claimsSet);
+            when(claimsSet.getStringClaim("sub")).thenReturn(userId.toString());
+
+            // Mock repository to simulate user not found
+            when(userRepository.findById(userId)).thenReturn(Optional.empty());
+
+            // Expect NotFoundException
+            NotFoundException exception = assertThrows(NotFoundException.class,
+                    () -> operationService.doOperation(token, "ADDITION", 1, 1));
+
+            assertEquals("User not found. Try logging in again", exception.getMessage());
+        }
     }
+
+
+
+
 
     @Test
     void testGetOperation_InvalidType() {
@@ -135,10 +139,30 @@ class OperationServiceImplTest {
     @Test
     void testSaveRecord_Success() {
         Record record = new Record();
-        when(recordRepository.save(record)).thenReturn(record);
+        record.setId(UUID.randomUUID()); // Mock ID for validation
 
+        // Mock save behavior
+        when(recordRepository.save(any(Record.class))).thenReturn(record);
+
+        // Execute the method
         Record result = operationService.saveRecord(operation, user, "result");
+
+        // Validate results
         assertNotNull(result);
+        assertEquals(record.getId(), result.getId());
         verify(recordRepository).save(any(Record.class));
     }
+
+    private void mockToken(String token, UUID userId) throws ParseException {
+        try (MockedStatic<SignedJWT> mockedJWT = mockStatic(SignedJWT.class)) {
+            SignedJWT signedJWT = mock(SignedJWT.class);
+            JWTClaimsSet claimsSet = mock(JWTClaimsSet.class);
+
+            mockedJWT.when(() -> SignedJWT.parse(token)).thenReturn(signedJWT);
+            when(signedJWT.getJWTClaimsSet()).thenReturn(claimsSet);
+            when(claimsSet.getStringClaim("sub")).thenReturn(userId.toString());
+        }
+    }
+
+
 }

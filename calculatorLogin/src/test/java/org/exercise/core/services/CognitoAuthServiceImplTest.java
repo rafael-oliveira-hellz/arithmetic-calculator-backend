@@ -20,59 +20,49 @@ class CognitoAuthServiceImplTest {
     }
 
     @Test
-    void calculateSecretHash_validInputs_shouldReturnCorrectHash() {
-        // Arrange
+    void calculateSecretHashValidInputsShouldReturnCorrectHash() {
         String clientId = "testClientId";
         String clientSecret = "testClientSecret";
         String username = "testUser";
 
-        // Manually calculate expected hash
         String expectedHash = calculateExpectedSecretHash(clientId, clientSecret, username);
 
-        // Act
         String actualHash = cognitoAuthService.calculateSecretHash(clientId, clientSecret, username);
 
-        // Assert
         assertEquals(expectedHash, actualHash, "The calculated hash does not match the expected hash.");
     }
 
     @Test
-    void calculateSecretHash_nullClientId_shouldThrowException() {
-        // Arrange
+    void calculateSecretHashNullClientIdShouldThrowException() {
         String clientId = null;
         String clientSecret = "testClientSecret";
         String username = "testUser";
 
-        // Act & Assert
         assertDoesNotThrow(() -> cognitoAuthService.calculateSecretHash(clientId, clientSecret, username),
                 "Expected a RuntimeException when clientId is null.");
     }
 
     @Test
-    void calculateSecretHash_nullClientSecret_shouldThrowException() {
-        // Arrange
+    void calculateSecretHashNullClientSecretShouldThrowException() {
         String clientId = "testClientId";
         String clientSecret = null;
         String username = "testUser";
 
-        // Act & Assert
         assertThrows(RuntimeException.class, () -> cognitoAuthService.calculateSecretHash(clientId, clientSecret, username),
                 "Expected a RuntimeException when clientSecret is null.");
     }
 
     @Test
-    void calculateSecretHash_nullUsername_shouldThrowException() {
+    void calculateSecretHashNullUsernameShouldThrowException() {
         // Arrange
         String clientId = "testClientId";
         String clientSecret = "testClientSecret";
         String username = null;
 
-        // Act & Assert
         assertDoesNotThrow(() -> cognitoAuthService.calculateSecretHash(clientId, clientSecret, username),
                 "Expected a RuntimeException when username is null.");
     }
 
-    // Helper method to manually calculate the expected hash
     private String calculateExpectedSecretHash(String clientId, String clientSecret, String username) {
         try {
             Mac mac = Mac.getInstance("HmacSHA256");

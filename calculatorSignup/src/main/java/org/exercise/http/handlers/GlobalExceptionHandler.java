@@ -6,6 +6,8 @@ import org.exercise.core.exceptions.BadGatewayException;
 import org.exercise.core.exceptions.IllegalArgumentException;
 import org.exercise.core.exceptions.InternalErrorException;
 import org.exercise.core.exceptions.UnprocessableEntityException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,53 +24,60 @@ import java.time.format.DateTimeParseException;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+
     @ExceptionHandler(InternalErrorException.class)
-    public ResponseEntity<String> handleInternalErrorException(InternalErrorException ex) {
+    public ResponseEntity<String> handleIllegalArgumentException(InternalErrorException ex) {
+        logError(ex, "Internal server error");
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ex.getMessage());
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<String> handleInternalErrorException(IllegalArgumentException ex) {
+    public ResponseEntity<String> handleIllegalArgumentException(IllegalArgumentException ex) {
+        logError(ex, "Illegal argument");
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
     }
 
     @ExceptionHandler(BadGatewayException.class)
     public ResponseEntity<String> badGatewayException(BadGatewayException ex) {
+        logError(ex, "Bad Gateway");
         return ResponseEntity.status(HttpStatus.BAD_GATEWAY).body(ex.getMessage());
-    }
-
-    @ExceptionHandler({UnprocessableEntityException.class})
-    public ResponseEntity<String> urlNotFound(UnprocessableEntityException ex , HttpServletRequest request) {
-        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(ex.getMessage());
     }
 
     @ExceptionHandler({NoHandlerFoundException.class})
     public ResponseEntity<String> urlNotFound(Exception ex , HttpServletRequest request) {
+        String body = "Requested url does not exist";
+        logError(ex, body);
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body("A url requisitada não existe. Por favor confira se não houve erro de digitação");
+                .body(body);
     }
 
     @ExceptionHandler({HttpRequestMethodNotSupportedException.class})
     public ResponseEntity<String> methodNotAllowed(Exception ex , HttpServletRequest request) {
+        logError(ex, "Method not allowed");
         return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).body(ex.getLocalizedMessage());
     }
 
     @ExceptionHandler({DataIntegrityViolationException.class})
     public ResponseEntity<String> conflict(Exception ex , HttpServletRequest request) {
+        logError(ex, "Data integrity violation");
         return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getLocalizedMessage());
     }
 
     @ExceptionHandler({MethodArgumentNotValidException.class, DateTimeParseException.class,
-            InvalidFormatException.class})
+            InvalidFormatException.class, UnprocessableEntityException.class})
     public ResponseEntity<String> invalidAtribute(Exception ex, HttpServletRequest request) {
         String isolatedErrorMessage = getConstraintDefaultMessage(ex);
+        logError(ex, "Unprocessable entity");
         return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(isolatedErrorMessage);
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<String> handleGeneralException(Exception ex) {
+        String message = "An unexpected error occurred: ";
+        logError(ex, message);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body("An unexpected error occurred: " + ex.getLocalizedMessage());
+                .body(message + ex.getLocalizedMessage());
     }
 
     String getConstraintDefaultMessage(Exception ex) {
@@ -78,6 +87,10 @@ public class GlobalExceptionHandler {
         int startIndex = errorMessage.indexOf(startTag) + startTag.length();
         int endIndex = errorMessage.indexOf(endTag, startIndex);
         return errorMessage.substring(startIndex, endIndex);
+    }
+
+    private static void logError(Exception ex, String message) {
+        logger.error("{}: {}", message, ex.getMessage());
     }
 
 }

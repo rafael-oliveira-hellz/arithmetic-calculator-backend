@@ -134,11 +134,15 @@ public class OperationServiceImpl implements OperationService {
         }
     }
 
-    private Integer division(Integer value1, Integer value2) {
+    private String division(Integer value1, Integer value2) {
         if (value2 == 0) {
             throw new UnsupportedOperationException("Division by 0 is not possible");
         }
-        return value1 / value2;
+
+        double result = (double) value1 / value2;
+        return (result % 1 == 0)
+                ? String.valueOf((int) result)
+                : String.format("%.2f", result).replace('.', ',');
     }
 
     private Integer squareRoot(Integer value1) {

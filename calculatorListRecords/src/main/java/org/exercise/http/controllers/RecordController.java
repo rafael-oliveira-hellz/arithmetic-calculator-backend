@@ -22,8 +22,9 @@ public class RecordController {
     @GetMapping("/records")
     public ResponseEntity<Page<Record>> getRecords(@RequestHeader String accessToken,
                                                    @RequestParam(defaultValue = "0") Integer page,
-                                                   @RequestParam(defaultValue = "10") Integer size) {
-        Page<Record> records = recordService.getRecords(accessToken, page, size);
+                                                   @RequestParam(defaultValue = "10") Integer size,
+                                                    @RequestParam(defaultValue = "data") String orderedBy) {
+        Page<Record> records = recordService.getRecords(accessToken, page, size, orderedBy);
         return ResponseEntity.ok(records);
     }
 }

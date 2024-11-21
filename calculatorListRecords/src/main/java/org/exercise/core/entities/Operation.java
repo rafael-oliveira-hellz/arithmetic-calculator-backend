@@ -14,7 +14,6 @@ import java.util.UUID;
 @Getter
 @Setter
 @Entity
-@AllArgsConstructor
 @NoArgsConstructor
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 @Table(name = "tb_operations")
@@ -31,8 +30,4 @@ public class Operation {
     @Column(nullable = false)
     private Integer cost;
 
-    public Operation(OperationType type, Integer cost) {
-        this.type = type;
-        this.cost = cost;
-    }
 }

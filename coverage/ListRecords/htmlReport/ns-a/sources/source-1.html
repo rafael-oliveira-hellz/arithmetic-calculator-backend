@@ -1,0 +1,100 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > RecordRepository</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.exercise.infrastructure.persistence</a>
+</div>
+
+<h1>Coverage Summary for Class: RecordRepository (org.exercise.infrastructure.persistence)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+</tr>
+  <tr>
+    <td class="name">RecordRepository$MockitoMock$8xpe0uYf</td>
+  </tr>
+  <tr>
+    <td class="name">RecordRepository$MockitoMock$8xpe0uYf$auxiliary$T4jTbODs</td>
+  </tr>
+  <tr>
+    <td class="name">RecordRepository$MockitoMock$8xpe0uYf$auxiliary$xSeFg8Ne</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package org.exercise.infrastructure.persistence;
+&nbsp;
+&nbsp;import org.exercise.core.entities.Record;
+&nbsp;import org.exercise.core.entities.User;
+&nbsp;import org.springframework.data.domain.Page;
+&nbsp;import org.springframework.data.domain.Pageable;
+&nbsp;import org.springframework.data.jpa.repository.JpaRepository;
+&nbsp;import org.springframework.data.jpa.repository.Query;
+&nbsp;import org.springframework.data.repository.query.Param;
+&nbsp;
+&nbsp;import java.util.UUID;
+&nbsp;
+&nbsp;public interface RecordRepository extends JpaRepository&lt;Record, UUID&gt; {
+&nbsp;
+&nbsp;    Page&lt;Record&gt; findAllByUserAndDeletedFalseOrderByDateAsc(User user, Pageable pageable);
+&nbsp;
+&nbsp;    @Query(&quot;SELECT r FROM Record r &quot; +
+&nbsp;            &quot;JOIN FETCH r.operation o &quot; +
+&nbsp;            &quot;WHERE r.user.id = :userId &quot; +
+&nbsp;            &quot;AND r.deleted = false &quot; +
+&nbsp;            &quot;ORDER BY o.type ASC&quot;)
+&nbsp;    Page&lt;Record&gt; findAllByUserAndDeletedFalseOrderByOperationTypeAsc(@Param(&quot;userId&quot;) UUID userId, Pageable pageable);
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-11-21 00:53</div>
+</div>
+</body>
+</html>

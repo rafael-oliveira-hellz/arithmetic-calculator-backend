@@ -1,0 +1,194 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > UserServiceImpl</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.exercise.core.services</a>
+</div>
+
+<h1>Coverage Summary for Class: UserServiceImpl (org.exercise.core.services)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">UserServiceImpl</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (5/5)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (37/37)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package org.exercise.core.services;
+&nbsp;
+&nbsp;import com.auth0.jwt.JWT;
+&nbsp;import lombok.extern.slf4j.Slf4j;
+&nbsp;import org.exercise.core.dtos.AuthResponse;
+&nbsp;import org.exercise.core.entities.User;
+&nbsp;import org.exercise.core.exceptions.LoginFailedException;
+&nbsp;import org.exercise.core.exceptions.NotFoundException;
+&nbsp;import org.exercise.core.interfaces.CognitoAuthService;
+&nbsp;import org.exercise.core.interfaces.UserService;
+&nbsp;import org.exercise.infrastructure.persistence.UserRepository;
+&nbsp;import org.slf4j.Logger;
+&nbsp;import org.slf4j.LoggerFactory;
+&nbsp;import org.springframework.beans.factory.annotation.Autowired;
+&nbsp;import org.springframework.stereotype.Service;
+&nbsp;import com.auth0.jwt.interfaces.DecodedJWT;
+&nbsp;import software.amazon.awssdk.services.cognitoidentityprovider.CognitoIdentityProviderClient;
+&nbsp;import software.amazon.awssdk.services.cognitoidentityprovider.model.AdminInitiateAuthRequest;
+&nbsp;import software.amazon.awssdk.services.cognitoidentityprovider.model.AdminInitiateAuthResponse;
+&nbsp;import software.amazon.awssdk.services.cognitoidentityprovider.model.AuthFlowType;
+&nbsp;import software.amazon.awssdk.services.cognitoidentityprovider.model.CognitoIdentityProviderException;
+&nbsp;
+&nbsp;import java.util.HashMap;
+&nbsp;import java.util.Map;
+&nbsp;import java.util.UUID;
+&nbsp;
+&nbsp;@Service
+&nbsp;public class UserServiceImpl implements UserService {
+<b class="fc">&nbsp;    private static final String CLIENT_ID = System.getenv(&quot;COGNITO_CLIENT_ID&quot;);</b>
+<b class="fc">&nbsp;    private static final String CLIENT_SECRET = System.getenv(&quot;COGNITO_CLIENT_SECRET&quot;);</b>
+<b class="fc">&nbsp;    private static final String POOL_ID = System.getenv(&quot;COGNITO_USER_POOL_ID&quot;);</b>
+&nbsp;
+&nbsp;    private final CognitoIdentityProviderClient cognitoClient;
+&nbsp;    private final UserRepository userRepository;
+&nbsp;    private final CognitoAuthService cognitoAuthService;
+&nbsp;
+<b class="fc">&nbsp;    private static final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);</b>
+&nbsp;
+&nbsp;    @Autowired
+<b class="fc">&nbsp;    public UserServiceImpl(UserRepository userRepository, CognitoIdentityProviderClient cognitoClient, CognitoAuthService cognitoAuthService) {</b>
+<b class="fc">&nbsp;        this.cognitoClient = cognitoClient;</b>
+<b class="fc">&nbsp;        this.userRepository = userRepository;</b>
+<b class="fc">&nbsp;        this.cognitoAuthService = cognitoAuthService;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public AuthResponse authenticate(String username, String password) {
+<b class="fc">&nbsp;        logger.info(&quot;Setting authentication params for user : {}&quot;, username);</b>
+<b class="fc">&nbsp;        Map&lt;String, String&gt; authParams = new HashMap&lt;&gt;();</b>
+<b class="fc">&nbsp;        authParams.put(&quot;USERNAME&quot;, username);</b>
+<b class="fc">&nbsp;        authParams.put(&quot;PASSWORD&quot;, password);</b>
+<b class="fc">&nbsp;        authParams.put(&quot;SECRET_HASH&quot;, cognitoAuthService.calculateSecretHash(CLIENT_ID, CLIENT_SECRET, username));</b>
+&nbsp;
+&nbsp;        try {
+<b class="fc">&nbsp;            logger.info(&quot;Building authentication request&quot;);</b>
+<b class="fc">&nbsp;            AdminInitiateAuthRequest authRequest = AdminInitiateAuthRequest.builder()</b>
+<b class="fc">&nbsp;                    .userPoolId(POOL_ID)</b>
+<b class="fc">&nbsp;                    .clientId(CLIENT_ID)</b>
+<b class="fc">&nbsp;                    .authFlow(AuthFlowType.ADMIN_NO_SRP_AUTH)</b>
+<b class="fc">&nbsp;                    .authParameters(authParams)</b>
+<b class="fc">&nbsp;                    .build();</b>
+&nbsp;
+<b class="fc">&nbsp;            logger.info(&quot;Authenticating user at cognito&quot;);</b>
+<b class="fc">&nbsp;            String accessToken = getAccessToken(authRequest);</b>
+&nbsp;
+<b class="fc">&nbsp;            logger.info(&quot;Authentication successful. Access token retrieved&quot;);</b>
+<b class="fc">&nbsp;            User user = getUserById(accessToken);</b>
+&nbsp;
+<b class="fc">&nbsp;            logger.info(&quot;User found. Username: {}&quot;, user.getUsername());</b>
+<b class="fc">&nbsp;            return new AuthResponse(user.getId(), user.getUsername(), user.getEmail(), user.getActive(),</b>
+<b class="fc">&nbsp;                    user.getBalance().getAmount(), accessToken);</b>
+<b class="fc">&nbsp;        } catch (CognitoIdentityProviderException e) {</b>
+<b class="fc">&nbsp;            logger.error(&quot;Error during authentication for user {}: {}&quot;, username, e.awsErrorDetails().errorMessage());</b>
+<b class="fc">&nbsp;            throw new LoginFailedException(&quot;Authentication failed: &quot; + e.awsErrorDetails().errorMessage());</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private String getAccessToken(AdminInitiateAuthRequest authRequest) {
+<b class="fc">&nbsp;        AdminInitiateAuthResponse authResponse = cognitoClient.adminInitiateAuth(authRequest);</b>
+<b class="fc">&nbsp;        return authResponse.authenticationResult().accessToken();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private User getUserById(String idToken) {
+<b class="fc">&nbsp;        logger.info(&quot;Retrieving user id from access token&quot;);</b>
+<b class="fc">&nbsp;        DecodedJWT jwt = JWT.decode(idToken);</b>
+<b class="fc">&nbsp;        UUID userId = jwt.getClaim(&quot;sub&quot;).as(UUID.class);</b>
+<b class="fc">&nbsp;        logger.info(&quot;User id found: {}&quot;, userId);</b>
+<b class="fc">&nbsp;        return userRepository.findByIdAndActive(userId, true).orElseThrow(() -&gt; new NotFoundException(&quot;User was not found&quot;));</b>
+&nbsp;    }
+&nbsp;}
+&nbsp;
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-11-21 00:51</div>
+</div>
+</body>
+</html>

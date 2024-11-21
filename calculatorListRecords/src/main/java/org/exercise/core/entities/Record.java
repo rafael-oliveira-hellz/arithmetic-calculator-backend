@@ -8,6 +8,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.exercise.core.enums.OperationType;
 
 import java.time.ZonedDateTime;
 import java.util.UUID;
@@ -49,13 +50,4 @@ public class Record {
     @Column(nullable = false)
     private Boolean deleted = false;
 
-    public Record(Operation operation, User user, Integer amount, Integer userBalance, String operationResponse) {
-        this.operation = operation;
-        this.user = user;
-        this.amount = amount;
-        this.userBalance = userBalance;
-        this.operationResponse = operationResponse;
-        this.date = ZonedDateTime.now();
-        this.deleted = false;
-    }
 }

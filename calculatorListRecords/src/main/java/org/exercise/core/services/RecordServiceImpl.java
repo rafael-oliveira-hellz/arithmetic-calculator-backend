@@ -1,5 +1,6 @@
 package org.exercise.core.services;
 
+import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import lombok.RequiredArgsConstructor;
 import org.exercise.core.entities.Record;
@@ -30,7 +31,7 @@ public class RecordServiceImpl implements RecordService {
     private final RecordRepository recordRepository;
     private final UserRepository userRepository;
 
-    public Page<Record> getRecords(String token, Integer page, Integer size) {
+    public Page<Record> getRecords(String token, Integer page, Integer size, String orderedBy) {
         logger.info("Fetching user from access token");
         UUID userId = getUserIdFromToken(token);
         logger.info("User id found: {}", userId);
@@ -38,9 +39,15 @@ public class RecordServiceImpl implements RecordService {
                 new NotFoundException("User was not found. Please try logging in again"));
         logger.info("User found. Retrieving user's records not deleted...");
         Pageable pageable = PageRequest.of(page, size, Sort.by("date").descending());
-        Page<Record> records = recordRepository.findAllByUserAndDeletedFalse(user, pageable);
+        Page<Record> records = getOrderedRecords(orderedBy, user, pageable);
         logger.info("Records retrieved");
         return records;
+    }
+
+    private Page<Record> getOrderedRecords(String orderedBy, User user, Pageable pageable) {
+        return (!orderedBy.equalsIgnoreCase("operationType")) ?
+                recordRepository.findAllByUserAndDeletedFalseOrderByDateAsc(user, pageable) :
+                recordRepository.findAllByUserAndDeletedFalseOrderByOperationTypeAsc(user.getId(), pageable);
     }
 
     private UUID getUserIdFromToken(String idToken) {

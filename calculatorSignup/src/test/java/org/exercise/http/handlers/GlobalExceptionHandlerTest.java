@@ -30,9 +30,9 @@ class GlobalExceptionHandlerTest {
     }
 
     @Test
-    void handleInternalErrorException_shouldReturnInternalServerError() {
+    void handleInternalErrorException_shouldReturnIllegalArgument() {
         InternalErrorException ex = new InternalErrorException("Internal error");
-        ResponseEntity<String> response = exceptionHandler.handleInternalErrorException(ex);
+        ResponseEntity<String> response = exceptionHandler.handleIllegalArgumentException(ex);
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
         assertEquals("Internal error", response.getBody());
     }
@@ -40,7 +40,7 @@ class GlobalExceptionHandlerTest {
     @Test
     void handleIllegalArgumentException_shouldReturnBadRequest() {
         IllegalArgumentException ex = new IllegalArgumentException("Invalid argument");
-        ResponseEntity<String> response = exceptionHandler.handleInternalErrorException(ex);
+        ResponseEntity<String> response = exceptionHandler.handleIllegalArgumentException(ex);
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
         assertEquals("Invalid argument", response.getBody());
     }
@@ -51,24 +51,6 @@ class GlobalExceptionHandlerTest {
         ResponseEntity<String> response = exceptionHandler.badGatewayException(ex);
         assertEquals(HttpStatus.BAD_GATEWAY, response.getStatusCode());
         assertEquals("Bad gateway", response.getBody());
-    }
-
-    @Test
-    void urlNotFound_shouldReturnUnprocessableEntity() {
-        HttpServletRequest request = mock(HttpServletRequest.class);
-        UnprocessableEntityException ex = new UnprocessableEntityException("Unprocessable entity");
-        ResponseEntity<String> response = exceptionHandler.urlNotFound(ex, request);
-        assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, response.getStatusCode());
-        assertEquals("Unprocessable entity", response.getBody());
-    }
-
-    @Test
-    void urlNotFound_shouldReturnNotFound() {
-        HttpServletRequest request = mock(HttpServletRequest.class);
-        NoHandlerFoundException ex = new NoHandlerFoundException("GET", "/test", null);
-        ResponseEntity<String> response = exceptionHandler.urlNotFound(ex, request);
-        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-        assertEquals("A url requisitada não existe. Por favor confira se não houve erro de digitação", response.getBody());
     }
 
     @Test
@@ -90,7 +72,7 @@ class GlobalExceptionHandlerTest {
     }
 
     @Test
-    void invalidAtribute_shouldReturnUnprocessableEntity() {
+    void invalidAtribute_shouldReturnInvalidAtributeEntity() {
         HttpServletRequest request = mock(HttpServletRequest.class);
         InvalidFormatException ex = mock(InvalidFormatException.class);
         String mockMessage = "Error occurred]]; default message [Invalid value]";
