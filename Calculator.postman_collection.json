@@ -1,0 +1,287 @@
+{
+	"info": {
+		"_postman_id": "cce0f30f-bf24-4c8a-89ae-7312b3dc8f20",
+		"name": "Calculator",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "28141967"
+	},
+	"item": [
+		{
+			"name": "Post Operation",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "accessToken",
+						"value": "eyJraWQiOiJ1Q1Y4czBCdTk5elZZNGw0UjAxZVwvRkRkZ1wvVUQ0TWNoWjZBSTg5WDY3Zms9IiwiYWxnIjoiUlMyNTYifQ.eyJzdWIiOiIyM2FjOGE5YS1kMGUxLTcwYjgtZDA2ZS04ZTFmZDg2MjY5ZmQiLCJpc3MiOiJodHRwczpcL1wvY29nbml0by1pZHAuc2EtZWFzdC0xLmFtYXpvbmF3cy5jb21cL3NhLWVhc3QtMV9KZU9KTWZUUVAiLCJjbGllbnRfaWQiOiJ0dnFmY205dGlpZXV2bzJrODkwOHJ1NjRxIiwib3JpZ2luX2p0aSI6IjllZjY0ZjY1LTg1ODktNDE4Ni05ZTY5LTA0NmJmMDM5YmZiMSIsImV2ZW50X2lkIjoiZTA4YmIwYmItZDgwNy00NWNiLWI2YjgtOGYzZWYyNzFlZTFiIiwidG9rZW5fdXNlIjoiYWNjZXNzIiwic2NvcGUiOiJhd3MuY29nbml0by5zaWduaW4udXNlci5hZG1pbiIsImF1dGhfdGltZSI6MTczMjA1ODM4MywiZXhwIjoxNzMyMDYxOTgzLCJpYXQiOjE3MzIwNTgzODMsImp0aSI6Ijg4MTgyMjlmLTc0NDQtNDBjZS1iOTg2LTA3MTg5MGVkMzNlMSIsInVzZXJuYW1lIjoidGVzdHVzZXIyMiJ9.vXRu8NiQkaNCDUNnMh5m6x5H_iRkFK5mm7Dqh5WaM20xxT513AZ38WIfhnF_DdKbULr3Sv3FJXwjY3cIORNLoOBK1y8AbT1MZvwiLjLhseLsvxfki2LAx_ZBwYAOtrZyPieYICs-AN2P7OtkeAbmhvOPglLW-YJo2wGWkzhDtix-ICb7b4M2WO1TQzRIOvE8Pri_YSupfY1wABoswyXI7VoBFERHPODXzLTmomnqgWC7_OdE4mCS6pJEkqynxwaXQhqUSbSZR-8F-wXuIK07Wxu8pLDYmhR57404lVI0bLNh01c4SaGp5QNMZxaXWqiI2WtLSTJxFRDNWEqdJjll1Q",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"value1\": 2,\r\n    \"value2\": 1\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://vs336jy84j.execute-api.sa-east-1.amazonaws.com/dev/api/v1/operations/subtraction",
+					"protocol": "https",
+					"host": [
+						"vs336jy84j",
+						"execute-api",
+						"sa-east-1",
+						"amazonaws",
+						"com"
+					],
+					"path": [
+						"dev",
+						"api",
+						"v1",
+						"operations",
+						"subtraction"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Records",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "accessToken",
+						"value": "eyJraWQiOiJ1Q1Y4czBCdTk5elZZNGw0UjAxZVwvRkRkZ1wvVUQ0TWNoWjZBSTg5WDY3Zms9IiwiYWxnIjoiUlMyNTYifQ.eyJzdWIiOiIyM2FjOGE5YS1kMGUxLTcwYjgtZDA2ZS04ZTFmZDg2MjY5ZmQiLCJpc3MiOiJodHRwczpcL1wvY29nbml0by1pZHAuc2EtZWFzdC0xLmFtYXpvbmF3cy5jb21cL3NhLWVhc3QtMV9KZU9KTWZUUVAiLCJjbGllbnRfaWQiOiJ0dnFmY205dGlpZXV2bzJrODkwOHJ1NjRxIiwib3JpZ2luX2p0aSI6IjdkMDY4ZjI0LWIzY2QtNDA5Ni04Y2M0LTE0NmJiODllNGQzZiIsImV2ZW50X2lkIjoiZDhjYTllNTQtM2M4MC00M2Y1LWEzMTUtNjMwYzg2MGE0NjYzIiwidG9rZW5fdXNlIjoiYWNjZXNzIiwic2NvcGUiOiJhd3MuY29nbml0by5zaWduaW4udXNlci5hZG1pbiIsImF1dGhfdGltZSI6MTczMjA5NjY0OCwiZXhwIjoxNzMyMTAwMjQ4LCJpYXQiOjE3MzIwOTY2NDgsImp0aSI6IjRkNWI0ODBkLWViZDQtNGIyOS04ZGNmLTVkMTNhZmYyN2M1NyIsInVzZXJuYW1lIjoidGVzdHVzZXIyMiJ9.T3sewVv--33BBdsujwgfDjlPUpnT03wB2v34gtrEUnEEAVJl8rj4gNfc5eGfNF0yReCADnMkWiSVuXVZhAJ0t2TqgKaExYOGU2yMjCHhdIEPyskiYbaaNYzLCbk_eUEprFCFJkZQ1HmW-d_knSNjyjdiycu-SMHtZD4jmp_5TLAqwccI5YS9kCtjqYxkFupWn1CJm4EzyYpFRYwy2ob6PQG8zpd0WoP2WARQhB5Eyf-JaTOwlBmFQuGGGnQu-hZq6uoZewdBStWx8ZyBN6V9LYnotyATWYQ5XE97TDGy02KdBarFgwukIFPVIQvR6K3mxLagdqGRvvvh_Tj_LeGB6g",
+						"type": "text"
+					},
+					{
+						"key": "size",
+						"value": "2",
+						"type": "text",
+						"disabled": true
+					},
+					{
+						"key": "page",
+						"value": "5",
+						"type": "text",
+						"disabled": true
+					}
+				],
+				"url": {
+					"raw": "https://vs336jy84j.execute-api.sa-east-1.amazonaws.com/dev/api/v1/records?page=0&size=1",
+					"protocol": "https",
+					"host": [
+						"vs336jy84j",
+						"execute-api",
+						"sa-east-1",
+						"amazonaws",
+						"com"
+					],
+					"path": [
+						"dev",
+						"api",
+						"v1",
+						"records"
+					],
+					"query": [
+						{
+							"key": "page",
+							"value": "0"
+						},
+						{
+							"key": "size",
+							"value": "1"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Operations",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "accessToken",
+						"value": "eyJraWQiOiJ1Q1Y4czBCdTk5elZZNGw0UjAxZVwvRkRkZ1wvVUQ0TWNoWjZBSTg5WDY3Zms9IiwiYWxnIjoiUlMyNTYifQ.eyJzdWIiOiIyM2FjOGE5YS1kMGUxLTcwYjgtZDA2ZS04ZTFmZDg2MjY5ZmQiLCJpc3MiOiJodHRwczpcL1wvY29nbml0by1pZHAuc2EtZWFzdC0xLmFtYXpvbmF3cy5jb21cL3NhLWVhc3QtMV9KZU9KTWZUUVAiLCJjbGllbnRfaWQiOiJ0dnFmY205dGlpZXV2bzJrODkwOHJ1NjRxIiwib3JpZ2luX2p0aSI6IjdkMDY4ZjI0LWIzY2QtNDA5Ni04Y2M0LTE0NmJiODllNGQzZiIsImV2ZW50X2lkIjoiZDhjYTllNTQtM2M4MC00M2Y1LWEzMTUtNjMwYzg2MGE0NjYzIiwidG9rZW5fdXNlIjoiYWNjZXNzIiwic2NvcGUiOiJhd3MuY29nbml0by5zaWduaW4udXNlci5hZG1pbiIsImF1dGhfdGltZSI6MTczMjA5NjY0OCwiZXhwIjoxNzMyMTAwMjQ4LCJpYXQiOjE3MzIwOTY2NDgsImp0aSI6IjRkNWI0ODBkLWViZDQtNGIyOS04ZGNmLTVkMTNhZmYyN2M1NyIsInVzZXJuYW1lIjoidGVzdHVzZXIyMiJ9.T3sewVv--33BBdsujwgfDjlPUpnT03wB2v34gtrEUnEEAVJl8rj4gNfc5eGfNF0yReCADnMkWiSVuXVZhAJ0t2TqgKaExYOGU2yMjCHhdIEPyskiYbaaNYzLCbk_eUEprFCFJkZQ1HmW-d_knSNjyjdiycu-SMHtZD4jmp_5TLAqwccI5YS9kCtjqYxkFupWn1CJm4EzyYpFRYwy2ob6PQG8zpd0WoP2WARQhB5Eyf-JaTOwlBmFQuGGGnQu-hZq6uoZewdBStWx8ZyBN6V9LYnotyATWYQ5XE97TDGy02KdBarFgwukIFPVIQvR6K3mxLagdqGRvvvh_Tj_LeGB6g",
+						"type": "text"
+					},
+					{
+						"key": "size",
+						"value": "2",
+						"type": "text",
+						"disabled": true
+					},
+					{
+						"key": "page",
+						"value": "5",
+						"type": "text",
+						"disabled": true
+					}
+				],
+				"url": {
+					"raw": "https://vs336jy84j.execute-api.sa-east-1.amazonaws.com/dev/api/v1/operations",
+					"protocol": "https",
+					"host": [
+						"vs336jy84j",
+						"execute-api",
+						"sa-east-1",
+						"amazonaws",
+						"com"
+					],
+					"path": [
+						"dev",
+						"api",
+						"v1",
+						"operations"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete Record",
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "accessToken",
+						"value": "eyJraWQiOiJ1Q1Y4czBCdTk5elZZNGw0UjAxZVwvRkRkZ1wvVUQ0TWNoWjZBSTg5WDY3Zms9IiwiYWxnIjoiUlMyNTYifQ.eyJzdWIiOiIyM2FjOGE5YS1kMGUxLTcwYjgtZDA2ZS04ZTFmZDg2MjY5ZmQiLCJpc3MiOiJodHRwczpcL1wvY29nbml0by1pZHAuc2EtZWFzdC0xLmFtYXpvbmF3cy5jb21cL3NhLWVhc3QtMV9KZU9KTWZUUVAiLCJjbGllbnRfaWQiOiJ0dnFmY205dGlpZXV2bzJrODkwOHJ1NjRxIiwib3JpZ2luX2p0aSI6IjdkMDY4ZjI0LWIzY2QtNDA5Ni04Y2M0LTE0NmJiODllNGQzZiIsImV2ZW50X2lkIjoiZDhjYTllNTQtM2M4MC00M2Y1LWEzMTUtNjMwYzg2MGE0NjYzIiwidG9rZW5fdXNlIjoiYWNjZXNzIiwic2NvcGUiOiJhd3MuY29nbml0by5zaWduaW4udXNlci5hZG1pbiIsImF1dGhfdGltZSI6MTczMjA5NjY0OCwiZXhwIjoxNzMyMTAwMjQ4LCJpYXQiOjE3MzIwOTY2NDgsImp0aSI6IjRkNWI0ODBkLWViZDQtNGIyOS04ZGNmLTVkMTNhZmYyN2M1NyIsInVzZXJuYW1lIjoidGVzdHVzZXIyMiJ9.T3sewVv--33BBdsujwgfDjlPUpnT03wB2v34gtrEUnEEAVJl8rj4gNfc5eGfNF0yReCADnMkWiSVuXVZhAJ0t2TqgKaExYOGU2yMjCHhdIEPyskiYbaaNYzLCbk_eUEprFCFJkZQ1HmW-d_knSNjyjdiycu-SMHtZD4jmp_5TLAqwccI5YS9kCtjqYxkFupWn1CJm4EzyYpFRYwy2ob6PQG8zpd0WoP2WARQhB5Eyf-JaTOwlBmFQuGGGnQu-hZq6uoZewdBStWx8ZyBN6V9LYnotyATWYQ5XE97TDGy02KdBarFgwukIFPVIQvR6K3mxLagdqGRvvvh_Tj_LeGB6g",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "https://vs336jy84j.execute-api.sa-east-1.amazonaws.com/dev/api/v1/records/c62ea49e-0935-4a02-9d9d-ce05ccc0b34d",
+					"protocol": "https",
+					"host": [
+						"vs336jy84j",
+						"execute-api",
+						"sa-east-1",
+						"amazonaws",
+						"com"
+					],
+					"path": [
+						"dev",
+						"api",
+						"v1",
+						"records",
+						"c62ea49e-0935-4a02-9d9d-ce05ccc0b34d"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Login",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"username\": \"testuser22\",\r\n    \"password\": \"Password123!\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://vs336jy84j.execute-api.sa-east-1.amazonaws.com/dev/api/v1/login",
+					"protocol": "https",
+					"host": [
+						"vs336jy84j",
+						"execute-api",
+						"sa-east-1",
+						"amazonaws",
+						"com"
+					],
+					"path": [
+						"dev",
+						"api",
+						"v1",
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Logout",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "accessToken",
+						"value": "eyJraWQiOiJ1Q1Y4czBCdTk5elZZNGw0UjAxZVwvRkRkZ1wvVUQ0TWNoWjZBSTg5WDY3Zms9IiwiYWxnIjoiUlMyNTYifQ.eyJzdWIiOiIyM2FjOGE5YS1kMGUxLTcwYjgtZDA2ZS04ZTFmZDg2MjY5ZmQiLCJpc3MiOiJodHRwczpcL1wvY29nbml0by1pZHAuc2EtZWFzdC0xLmFtYXpvbmF3cy5jb21cL3NhLWVhc3QtMV9KZU9KTWZUUVAiLCJjbGllbnRfaWQiOiJ0dnFmY205dGlpZXV2bzJrODkwOHJ1NjRxIiwib3JpZ2luX2p0aSI6IjllZjY0ZjY1LTg1ODktNDE4Ni05ZTY5LTA0NmJmMDM5YmZiMSIsImV2ZW50X2lkIjoiZTA4YmIwYmItZDgwNy00NWNiLWI2YjgtOGYzZWYyNzFlZTFiIiwidG9rZW5fdXNlIjoiYWNjZXNzIiwic2NvcGUiOiJhd3MuY29nbml0by5zaWduaW4udXNlci5hZG1pbiIsImF1dGhfdGltZSI6MTczMjA1ODM4MywiZXhwIjoxNzMyMDYxOTgzLCJpYXQiOjE3MzIwNTgzODMsImp0aSI6Ijg4MTgyMjlmLTc0NDQtNDBjZS1iOTg2LTA3MTg5MGVkMzNlMSIsInVzZXJuYW1lIjoidGVzdHVzZXIyMiJ9.vXRu8NiQkaNCDUNnMh5m6x5H_iRkFK5mm7Dqh5WaM20xxT513AZ38WIfhnF_DdKbULr3Sv3FJXwjY3cIORNLoOBK1y8AbT1MZvwiLjLhseLsvxfki2LAx_ZBwYAOtrZyPieYICs-AN2P7OtkeAbmhvOPglLW-YJo2wGWkzhDtix-ICb7b4M2WO1TQzRIOvE8Pri_YSupfY1wABoswyXI7VoBFERHPODXzLTmomnqgWC7_OdE4mCS6pJEkqynxwaXQhqUSbSZR-8F-wXuIK07Wxu8pLDYmhR57404lVI0bLNh01c4SaGp5QNMZxaXWqiI2WtLSTJxFRDNWEqdJjll1Q",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text",
+						"disabled": true
+					}
+				],
+				"url": {
+					"raw": "https://vs336jy84j.execute-api.sa-east-1.amazonaws.com/dev/api/v1/logout",
+					"protocol": "https",
+					"host": [
+						"vs336jy84j",
+						"execute-api",
+						"sa-east-1",
+						"amazonaws",
+						"com"
+					],
+					"path": [
+						"dev",
+						"api",
+						"v1",
+						"logout"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Signup",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"username\": \"testuser3\",\r\n    \"email\": \"testuser3@example.com\",\r\n    \"password\": \"Password123!\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://vs336jy84j.execute-api.sa-east-1.amazonaws.com/dev/api/v1/signup",
+					"protocol": "https",
+					"host": [
+						"vs336jy84j",
+						"execute-api",
+						"sa-east-1",
+						"amazonaws",
+						"com"
+					],
+					"path": [
+						"dev",
+						"api",
+						"v1",
+						"signup"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
