@@ -61,7 +61,7 @@ Ensure the following tools are installed:
 
 ```bash
 git clone <repository-url>
-cd calculatorRegistry
+cd calculatorSignup
 ```
 
 ## **2. Set Environment Variables**
@@ -156,13 +156,10 @@ This project supports Docker for local testing and deployment, allowing you to s
 Create a `Dockerfile` in the root directory of your project with the following content:
 
 ```dockerfile
-# Use the AWS Lambda base image for Java
 FROM public.ecr.aws/lambda/java:11
 
-# Copy the built JAR file to the Lambda's task root
 COPY target/calculatorRegistry-0.0.1-SNAPSHOT.jar ${LAMBDA_TASK_ROOT}/app.jar
 
-# Define the Lambda handler (Fully Qualified Class Name)
 CMD ["org.exercise.infrastructure.lambda.StreamLambdaHandler"]
 ```
 
@@ -347,10 +344,18 @@ docker push <account_id>.dkr.ecr.<region>.amazonaws.com/calculator-signup:latest
 3. Select "Container Image" as the function source.
 4. Specify the ECR image URI.
 
-### **Step 7: Contributing**
+## **Technologies Used**
+
+- Java 21
+- Spring Boot
+- AWS Lambda
+- AWS RDS PostgreSQL
+- AWS API Gateway
+
+### **Contributing**
 
 Feel free to open issues or submit pull requests to contribute to the project.
 
-### **Step 8: License**
+### **License**
 
 This project is licensed under the MIT License.

@@ -1,82 +1,333 @@
-# calculator serverless API
-The calculator project, created with [`aws-serverless-java-container`](https://github.com/aws/serverless-java-container).
+# Calculator delete-record - Serverless Microservice
 
-The starter project defines a simple `/ping` resource that can accept `GET` requests with its tests.
+## **Overview**
 
-The project folder also includes a `template.yml` file. You can use this [SAM](https://github.com/awslabs/serverless-application-model) file to deploy the project to AWS Lambda and Amazon API Gateway or test in local with the [SAM CLI](https://github.com/awslabs/aws-sam-cli). 
+The **Calculator Delete Record** microservice is a serverless application designed exclusively for **operation deletion**. It operates on AWS Lambda, ensuring scalability, cost-efficiency, and seamless integration with AWS services. The microservice includes core functionality such as records deletion and validations.
 
-## Pre-requisites
-* [AWS CLI](https://aws.amazon.com/cli/)
-* [SAM CLI](https://github.com/awslabs/aws-sam-cli)
-* [Gradle](https://gradle.org/) or [Maven](https://maven.apache.org/)
+---
 
-## Building the project
-You can use the SAM CLI to quickly build the project
-```bash
-$ mvn archetype:generate -DartifactId=calculator -DarchetypeGroupId=com.amazonaws.serverless.archetypes -DarchetypeArtifactId=aws-serverless-jersey-archetype -DarchetypeVersion=2.0.3 -DgroupId=org.exercise -Dversion=1.0-SNAPSHOT -Dinteractive=false
-$ cd calculator
-$ sam build
-Building resource 'CalculatorFunction'
-Running JavaGradleWorkflow:GradleBuild
-Running JavaGradleWorkflow:CopyArtifacts
+## **Project Features**
 
-Build Succeeded
+- **Architecture**: The project follows a combination of the Domain-Driven Design (DDD) and the Layered Architecture approaches.
+- **Delete Record**: Implements API for operation soft deletion.
+- **Serverless Framework**: Leverages AWS Lambda for event-driven architecture.
+- **Global Exception Handling**: Centralized exception handling to manage and return meaningful error responses.
 
-Built Artifacts  : .aws-sam/build
-Built Template   : .aws-sam/build/template.yaml
+---
 
-Commands you can use next
-=========================
-[*] Invoke Function: sam local invoke
-[*] Deploy: sam deploy --guided
+## **Project Structure**
+
+```plaintext
+src/main/java/org/exercise
+├── config
+│   ├── CognitoConfig.java          // AWS Cognito configuration for user authentication.
+│   ├── CorsConfig.java             // CORS configuration for HTTP requests.
+│
+├── core
+│   ├── dtos                        // Data Transfer Objects (DTOs) for request/response payloads.
+│   ├── entities                    // JPA entities (e.g., User, Balance).
+│   ├── exceptions                  // Custom exception handling classes.
+│   ├── interfaces                  // Service interface definitions.
+│   ├── services                    // Business logic implementations.
+│
+├── http
+│   ├── controllers                 // REST controllers for handling HTTP endpoints.
+│   ├── handlers                    // Global exception handler for REST APIs.
+│
+├── infrastructure
+│   ├── lambda                      // AWS Lambda handler for integration.
+│
+├── persistence
+│   ├── UserRepository.java         // JPA repository for user data persistence.
+│
+└── Application.java                // Main Spring Boot entry point.
 ```
 
-## Testing locally with the SAM CLI
+## **Getting Started**
 
-From the project root folder - where the `template.yml` file is located - start the API with the SAM CLI.
+### **Prerequisites**
+
+Ensure the following tools are installed:
+
+- **Java** (11 or higher)
+- **Maven**
+- **Docker** (for AWS Lambda testing)
+- **AWS CLI** (configured with your AWS account)
+- **Serverless Framework** (optional for deployment)
+
+### **Setup**
+
+#### 1. Clone the Repository
 
 ```bash
-$ sam local start-api
-
-...
-Mounting com.amazonaws.serverless.archetypes.StreamLambdaHandler::handleRequest (java11) at http://127.0.0.1:3000/{proxy+} [OPTIONS GET HEAD POST PUT DELETE PATCH]
-...
+git clone <repository-url>
+cd calculatorDeleteRecord
 ```
 
-Using a new shell, you can send a test ping request to your API:
+## **2. Set Environment Variables**
+
+The application relies on several environment variables defined in `application.properties`. Set these variables based on your operating system:
+
+### **Linux/MacOS**
 
 ```bash
-$ curl -s http://127.0.0.1:3000/ping | python -m json.tool
+export DB_HOST=your_database_host
+export DB_PORT=your_database_port
+export DB_NAME=your_database_name
+export DB_USER=your_database_user
+export DB_PASSWORD=your_database_password
+```
 
+### **Windows (cmd)**
+
+```bash
+set DB_HOST=your_database_host
+set DB_PORT=your_database_port
+set DB_NAME=your_database_name
+set DB_USER=your_database_user
+set DB_PASSWORD=your_database_password
+```
+
+### **Windows (PowerShell)**
+
+```bash
+$env:DB_HOST="your_database_host"
+$env:DB_PORT="your_database_port"
+$env:DB_NAME="your_database_name"
+$env:DB_USER="your_database_user"
+$env:DB_PASSWORD="your_database_password"
+```
+
+## **3. Running the Application**
+
+Run the application using Maven. Depending on your environment, use one of the following commands:
+
+### **Using Maven Wrapper**
+
+```bash
+./mvnw spring-boot:run
+```
+
+### **Using Maven**
+
+```bash
+mvn spring-boot:run
+```
+
+### Alternatively, you can build and run the JAR file:
+
+## Using Maven Wrapper
+
+```bash
+./mvnw clean package
+java -jar target/calculatorDeleteRecords-0.0.1-SNAPSHOT.jar
+```
+
+## Using Maven
+
+```bash
+mvn clean package
+java -jar target/calculatorDeleteRecords-0.0.1-SNAPSHOT.jar
+```
+
+## **4. Using Docker**
+
+This project supports Docker for local testing and deployment, allowing you to simulate AWS Lambda behavior locally and package the application for deployment.
+
+---
+
+### **Step 4.1: Create the Dockerfile**
+
+Create a `Dockerfile` in the root directory of your project with the following content:
+
+```dockerfile
+FROM public.ecr.aws/lambda/java:11
+
+COPY target/calculatorDeleteRecord-0.0.1-SNAPSHOT.jar ${LAMBDA_TASK_ROOT}/app.jar
+
+CMD ["org.exercise.infrastructure.lambda.StreamLambdaHandler"]
+```
+
+### **Step 4.2: Build the Docker Image**
+
+Run the following command in the root of your project to build the Docker image:
+
+```bash
+docker build -t calculator-delete-record .
+```
+
+**This command**:
+
+- Uses the Dockerfile to build an image named calculator-delete-record.
+- Copies the compiled application JAR into the container.
+
+### **Step 4.3: Run the Docker Container**
+
+Use the following command to run the Docker container locally and expose it for testing:
+
+```bash
+docker run -p 9000:8080 calculator-delete-record
+```
+
+**Explanation**:
+
+- The `-p 9000:8080` flag maps port `9000` on your local machine to port `8080` in the container.
+
+Once the container is running, it will simulate the AWS Lambda environment.
+
+### **Step 4.4: Test the Docker Container**
+
+Use `curl` or an HTTP client to send a POST request to test the Lambda function:
+
+```bash
+curl -X POST "http://localhost:9000/2015-03-31/functions/function/invocations" -d '{}'
+```
+
+If configured correctly, the container should process the request and return a response.
+
+### **Step 4.5: Stop the Container**
+
+To stop the running container, press `Ctrl+C` in the terminal where the container is running or find the container ID using:
+
+```bash
+docker ps
+```
+
+Then stop it with:
+
+```bash
+docker stop <container_id>
+```
+
+### **Optional: Test Changes**
+
+If you make changes to the code, rebuild the JAR and Docker image:
+
+- Rebuild the JAR
+- Rebuild the Docker Image
+- Run the Container Again
+
+By following these steps, you can test your Lambda function locally using Docker and prepare it for deployment.
+
+## **Step 5: Testing the Lambda Locally**
+
+Follow these steps to test the Lambda function locally for user delete-record using Docker.
+
+### **Step 5.1: Start the Docker Container**
+
+Ensure the container is running. Use the following command to start it:
+
+```bash
+docker run -p 9000:8080 calculator-delete-record
+```
+
+**This command**:
+
+Maps port `9000` on your local machine to port `8080` inside the container.
+Simulates the AWS Lambda runtime environment.
+
+### **Step 5.2: Create a Test Payload**
+
+Create a JSON file with the test payload containing the user delete-record data, in the project root, for instance.
+
+```plaintext
+project-root/
+├── Dockerfile
+├── src/
+└── target/
+```
+
+### **Step 5.3: Send a Request**
+
+Use `curl` or any HTTP client to send the payload to the Lambda endpoint exposed by the container. The default endpoint for the simulated Lambda is:
+
+```bash
+http://localhost:9000/2015-03-31/functions/function/invocations
+```
+
+Run the following command to send the request:
+
+```bash
+curl -X DELETE \
+    -H "Content-Type: application/json" \
+    "http://localhost:9000/2015-03-31/functions/function/invocations"
+```
+
+### **Step 5.4: Validate the Response**
+
+If everything is configured correctly:
+
+- The container processes the payload.
+- The `StreamLambdaHandler` class is invoked.
+- The Lambda returns a response, typically in JSON format.
+
+For example, a successful operation might return:
+
+```
 {
-    "pong": "Hello, World!"
+    "message": "Record with id ... deleted successfully!"
 }
-``` 
-
-## Deploying to AWS
-To deploy the application in your AWS account, you can use the SAM CLI's guided deployment process and follow the instructions on the screen
-
-```
-$ sam deploy --guided
 ```
 
-Once the deployment is completed, the SAM CLI will print out the stack's outputs, including the new application URL. You can use `curl` or a web browser to make a call to the URL
+## Tips for Debugging
 
-```
-...
--------------------------------------------------------------------------------------------------------------
-OutputKey-Description                        OutputValue
--------------------------------------------------------------------------------------------------------------
-CalculatorApi - URL for application            https://xxxxxxxxxx.execute-api.us-west-2.amazonaws.com/Prod/pets
--------------------------------------------------------------------------------------------------------------
-```
+### Check Container Logs
 
-Copy the `OutputValue` into a browser or use curl to test your first request:
+If the response is not as expected, check the container logs for more details:
 
 ```bash
-$ curl -s https://xxxxxxx.execute-api.us-west-2.amazonaws.com/Prod/ping | python -m json.tool
-
-{
-    "pong": "Hello, World!"
-}
+docker logs <container_id>
 ```
+
+To find the container ID, use:
+
+```bash
+docker ps
+```
+
+## **Step 6: Deploying to AWS Lambda**
+
+## **Upload to Amazon ECR**
+
+To deploy the Docker container as an AWS Lambda function, follow these steps:
+
+### **Step 6.1: Authenticate Docker with ECR**
+
+```bash
+aws ecr get-login-password --region <region> | docker login --username AWS --password-stdin <account_id>.dkr.ecr.<region>.amazonaws.com
+```
+
+### **Step 6.2: Tag the Docker Image**
+
+```bash
+docker tag calculator-delete-record:latest <account_id>.dkr.ecr.<region>.amazonaws.com/calculator-delete-record:latest
+```
+
+### **Step 6.3: Push the Image to ECR**
+
+```bash
+docker push <account_id>.dkr.ecr.<region>.amazonaws.com/calculator-delete-record:latest
+```
+
+### **Step 6.4: Configure Lambda to Use the Docker Image**
+
+1. Go to the AWS Lambda Console.
+2. Create a new Lambda function.
+3. Select "Container Image" as the function source.
+4. Specify the ECR image URI.
+
+## **Technologies Used**
+
+- Java 21
+- Spring Boot
+- AWS Lambda
+- AWS RDS PostgreSQL
+- AWS API Gateway
+
+### **Contributing**
+
+Feel free to open issues or submit pull requests to contribute to the project.
+
+### **License**
+
+This project is licensed under the MIT License.
