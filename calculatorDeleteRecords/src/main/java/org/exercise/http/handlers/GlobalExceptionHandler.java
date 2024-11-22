@@ -5,6 +5,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.exercise.core.exceptions.ForbiddenException;
 import org.exercise.core.exceptions.InternalErrorException;
 import org.exercise.core.exceptions.NotFoundException;
+import org.hibernate.exception.ConstraintViolationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -18,6 +19,7 @@ import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
 import java.time.format.DateTimeParseException;
+import java.util.Map;
 
 @EnableWebMvc
 @RestControllerAdvice
@@ -57,10 +59,31 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler({DataIntegrityViolationException.class})
-    public ResponseEntity<String> conflict(Exception ex , HttpServletRequest request) {
-        logError(ex, "Data integrity violation");
-        return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getLocalizedMessage());
+    public ResponseEntity<Object> handleDataIntegrityViolation(Exception ex, HttpServletRequest request) {
+        logError(ex, "Data integrity violation occurred");
+
+        Throwable rootCause = ex.getCause() != null ? ex.getCause() : ex;
+
+        if (rootCause instanceof ConstraintViolationException constraintViolation) {
+
+            String constraintName = constraintViolation.getConstraintName();
+
+            if (constraintName != null && constraintName.contains("unique")) {
+                return ResponseEntity.status(HttpStatus.CONFLICT).body(
+                        Map.of("status", 409, "error", "Conflict", "message", "Unique constraint violated")
+                );
+            } else if (constraintName != null && constraintName.contains("foreign_key")) {
+                return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(
+                        Map.of("status", 422, "error", "Unprocessable Entity", "message", "Foreign key constraint violated")
+                );
+            }
+        }
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                Map.of("status", 400, "error", "Bad Request", "message", rootCause.getMessage())
+        );
     }
+
 
     @ExceptionHandler({MethodArgumentNotValidException.class, DateTimeParseException.class,
             InvalidFormatException.class})

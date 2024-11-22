@@ -15,8 +15,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.servlet.NoHandlerFoundException;
 
+import java.util.Map;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 class GlobalExceptionHandlerTest {
 
@@ -75,10 +78,56 @@ class GlobalExceptionHandlerTest {
     @Test
     void conflict_shouldReturnConflict() {
         HttpServletRequest request = mock(HttpServletRequest.class);
-        DataIntegrityViolationException ex = new DataIntegrityViolationException("Data conflict");
-        ResponseEntity<String> response = exceptionHandler.conflict(ex, request);
+
+        org.hibernate.exception.ConstraintViolationException hibernateEx =
+                mock(org.hibernate.exception.ConstraintViolationException.class);
+        when(hibernateEx.getConstraintName()).thenReturn("unique_constraint");
+
+        DataIntegrityViolationException ex =
+                new DataIntegrityViolationException("Unique constraint violation", hibernateEx);
+
+        ResponseEntity<Object> response = exceptionHandler.handleDataIntegrityViolation(ex, request);
+
         assertEquals(HttpStatus.CONFLICT, response.getStatusCode());
-        assertEquals("Data conflict", response.getBody());
+        assertEquals(
+                Map.of("status", 409, "error", "Conflict", "message", "Unique constraint violated"),
+                response.getBody()
+        );
+    }
+
+
+    @Test
+    void conflict_shouldReturnUnprocessableEntity() {
+        HttpServletRequest request = mock(HttpServletRequest.class);
+
+        org.hibernate.exception.ConstraintViolationException hibernateEx =
+                mock(org.hibernate.exception.ConstraintViolationException.class);
+        when(hibernateEx.getConstraintName()).thenReturn("foreign_key_constraint");
+
+        DataIntegrityViolationException ex =
+                new DataIntegrityViolationException("Foreign key constraint violation", hibernateEx);
+
+        ResponseEntity<Object> response = exceptionHandler.handleDataIntegrityViolation(ex, request);
+
+        assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, response.getStatusCode());
+        assertEquals(
+                Map.of("status", 422, "error", "Unprocessable Entity", "message", "Foreign key constraint violated"),
+                response.getBody()
+        );
+    }
+
+    @Test
+    void conflict_shouldReturnBadRequestForGenericCase() {
+        HttpServletRequest request = mock(HttpServletRequest.class);
+        DataIntegrityViolationException ex = new DataIntegrityViolationException("Generic data integrity violation");
+
+        ResponseEntity<Object> response = exceptionHandler.handleDataIntegrityViolation(ex, request);
+
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertEquals(
+                Map.of("status", 400, "error", "Bad Request", "message", "Generic data integrity violation"),
+                response.getBody()
+        );
     }
 
     @Test
@@ -86,7 +135,7 @@ class GlobalExceptionHandlerTest {
         HttpServletRequest request = mock(HttpServletRequest.class);
         InvalidFormatException ex = mock(InvalidFormatException.class);
         String mockMessage = "Error occurred]]; default message [Invalid value]";
-        org.mockito.Mockito.when(ex.getLocalizedMessage()).thenReturn(mockMessage);
+        when(ex.getLocalizedMessage()).thenReturn(mockMessage);
         ResponseEntity<String> response = exceptionHandler.invalidAtribute(ex, request);
         assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, response.getStatusCode());
         assertEquals("Invalid value", response.getBody());

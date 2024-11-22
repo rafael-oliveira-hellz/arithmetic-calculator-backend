@@ -71,7 +71,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler({DataIntegrityViolationException.class})
     public ResponseEntity<String> conflict(Exception ex , HttpServletRequest request) {
         logError(ex, "Data integrity violation");
-        return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getLocalizedMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getLocalizedMessage());
     }
 
     @ExceptionHandler({MethodArgumentNotValidException.class, DateTimeParseException.class,

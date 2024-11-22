@@ -39,7 +39,7 @@ public class Record {
     @Column(nullable = false, name = "user_balance")
     private Integer userBalance;
 
-    @Column(nullable = false, name = "operation_response")
+    @Column(nullable = false, name = "operation_response", columnDefinition = "TEXT")
     private String operationResponse;
 
     @Column(nullable = false)

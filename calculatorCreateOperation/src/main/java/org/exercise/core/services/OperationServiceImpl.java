@@ -37,13 +37,33 @@ public class OperationServiceImpl implements OperationService {
 
     @Transactional
     public Record doOperation(String token, String type, Integer value1, Integer value2) {
-        logger.info("Retrieving user id from access token");
-        UUID userId = getUserIdFromToken(token);
-        User user = findUserById(userId);
-        Operation operation = getOperation(type, value1, value2);
-        User updatedUser = checkBalance(user, operation.getCost());
-        String result = executeOperation(operation.getType(), value1, value2);
-        return saveRecord(operation, updatedUser, result);
+        try {
+            logger.info("Retrieving user ID from access token");
+            UUID userId = getUserIdFromToken(token);
+
+            User user = findUserById(userId);
+            Operation operation = getOperation(type, value1, value2);
+
+            User updatedUser = checkBalance(user, operation.getCost());
+            String result = executeOperation(operation.getType(), value1, value2);
+
+            return saveRecord(operation, updatedUser, result);
+        } catch (UnsupportedOperationException e) {
+            logger.error("Operation not supported: {}", e.getMessage(), e);
+            throw e;
+        } catch (BadRequestException e) {
+            logger.warn("Bad request: {}", e.getMessage(), e);
+            throw e;
+        } catch (PaymentRequiredException e) {
+            logger.error("Payment required: {}", e.getMessage(), e);
+            throw e;
+        } catch (NotFoundException e) {
+            logger.warn("Resource not found: {}", e.getMessage(), e);
+            throw e;
+        } catch (Exception e) {
+            logger.error("Unexpected error occurred: {}", e.getMessage(), e);
+            throw new RuntimeException("An unexpected error occurred. Please try again later.");
+        }
     }
 
     private UUID getUserIdFromToken(String accessToken) {
@@ -54,7 +74,10 @@ public class OperationServiceImpl implements OperationService {
                         try {
                             return UUID.fromString(sub);
                         } catch (IllegalArgumentException e) {
-                            throw new BadRequestException("Token contains invalid user ID format: " + sub, e.getMessage());
+                            throw new BadRequestException(
+                                    "Token contains invalid user ID format",
+                                    "Invalid UUID format: " + sub
+                            );
                         }
                     })
                     .orElseThrow(() -> new BadRequestException("Token does not contain user ID"));
@@ -64,23 +87,30 @@ public class OperationServiceImpl implements OperationService {
     }
 
     private User findUserById(UUID userId) {
-        return userRepository.findById(userId).orElseThrow(() ->
-                new NotFoundException("User not found. Try logging in again"));
+        return userRepository.findById(userId).orElseThrow(() -> {
+            logger.warn("User not found with ID: {}", userId);
+            return new NotFoundException("User not found. Try logging in again");
+        });
     }
 
     public Operation getOperation(String type, Integer value1, Integer value2) {
         try {
             OperationType operationType = OperationType.valueOf(type.toUpperCase());
             checkValues(value1, value2, operationType);
+
             return operationRepository.findByType(operationType)
-                    .orElseThrow(() -> new NotFoundException("Operation type not found"));
+                    .orElseThrow(() -> {
+                        logger.warn("Operation type not found: {}", operationType);
+                        return new NotFoundException("Operation type not found");
+                    });
         } catch (IllegalArgumentException e) {
-            throw new IllegalArgumentException("Invalid operation type: " + type, e);
+            throw new BadRequestException("Invalid operation type: " + type, e.getMessage());
         }
     }
 
     private void checkValues(Integer value1, Integer value2, OperationType operationType) {
         boolean needTwoValues = operationType.getId() >= 1 && operationType.getId() < 4;
+
         if (value1 == null) {
             throw new BadRequestException("The first value is required for operation: " + operationType);
         }
@@ -91,23 +121,31 @@ public class OperationServiceImpl implements OperationService {
 
     User checkBalance(User user, Integer cost) {
         int result = user.getBalance().getAmount() - cost;
+
         if (result < 0) {
             throw new PaymentRequiredException("Insufficient User Balance for this operation");
         }
+
         user.getBalance().setAmount(result);
         logger.info("User balance updated: {} for user: {}", result, user.getId());
+
         return userRepository.save(user);
     }
 
     String executeOperation(OperationType type, Integer value1, Integer value2) {
-        return String.valueOf(switch (type) {
-            case ADDITION -> safeAdd(value1, value2);
-            case SUBTRACTION -> safeSubtract(value1, value2);
-            case MULTIPLICATION -> safeMultiply(value1, value2);
-            case DIVISION -> division(value1, value2);
-            case SQUARE_ROOT -> squareRoot(value1);
-            case RANDOM_STRING -> client.fetchRandomString(value1);
-        });
+        try {
+            return String.valueOf(switch (type) {
+                case ADDITION -> safeAdd(value1, value2);
+                case SUBTRACTION -> safeSubtract(value1, value2);
+                case MULTIPLICATION -> safeMultiply(value1, value2);
+                case DIVISION -> division(value1, value2);
+                case SQUARE_ROOT -> squareRoot(value1);
+                case RANDOM_STRING -> client.fetchRandomString(value1);
+            });
+        } catch (UnsupportedOperationException e) {
+            logger.error("Error executing operation: {}", e.getMessage(), e);
+            throw e;
+        }
     }
 
     private Integer safeAdd(Integer a, Integer b) {
@@ -155,6 +193,7 @@ public class OperationServiceImpl implements OperationService {
     Record saveRecord(Operation operation, User user, String result) {
         Record record = new Record(operation, user, operation.getCost(), user.getBalance().getAmount(), result);
         logger.info("Persisting record for operation: {} and user: {}", operation.getType(), user.getId());
+
         return recordRepository.save(record);
     }
 }
