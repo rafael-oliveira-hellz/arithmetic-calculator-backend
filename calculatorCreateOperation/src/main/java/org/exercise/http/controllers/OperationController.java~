@@ -22,7 +22,7 @@ public class OperationController {
 
     @PostMapping("/operations/{type}")
     public ResponseEntity<Record> registerUser(@RequestHeader String accessToken, @PathVariable String type, @RequestBody Values values) {
-        Record responseRecord = operationService.doOperation(accessToken, type, String.valueOf(values.value1()), String.valueOf(values.value2()));
+        Record responseRecord = operationService.doOperation(accessToken, type, values.value1(), values.value2());
         return ResponseEntity.ok(responseRecord);
     }
 }

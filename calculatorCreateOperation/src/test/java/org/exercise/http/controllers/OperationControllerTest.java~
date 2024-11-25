@@ -45,7 +45,7 @@ class OperationControllerTest {
     void registerUser_shouldReturnRecordResponse() {
         String accessToken = "dummyAccessToken";
         String type = "exampleType";
-        Values values = new Values(10, 20);
+        Values values = new Values(10.0, 20.0);
 
         Operation mockOperation = new Operation();
         User mockUser = new User();
@@ -59,7 +59,7 @@ class OperationControllerTest {
                 .thenReturn(expectedRecord);
 
         ResponseEntity<Record> response = operationController.registerUser(accessToken, type, values);
-        
+
         assertEquals(expectedRecord, response.getBody());
         assertEquals(HttpStatus.OK, response.getStatusCode());
         verify(operationService, times(1)).doOperation(accessToken, type, values.value1(), values.value2());

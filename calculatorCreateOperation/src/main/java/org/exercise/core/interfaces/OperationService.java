@@ -5,9 +5,11 @@ import org.exercise.core.entities.Record;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+
 @Service
 public interface OperationService {
 
-    Record doOperation(String token, String type, Double value1, Double value2);
-    Operation getOperation(String type, Double value1, Double value2);
+    Record doOperation(String token, String type, String value1Str, String value2Str);
+    Operation getOperation(String type, BigDecimal value1, BigDecimal value2);
 }

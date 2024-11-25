@@ -30,13 +30,13 @@ Current scope:     <a href="../../index.html">all classes</a>
   <th class="name">Class</th>
 </tr>
   <tr>
-    <td class="name">OperationService$MockitoMock$lDAfOMoM</td>
+    <td class="name">OperationService$MockitoMock$VKDYSsQi</td>
   </tr>
   <tr>
-    <td class="name">OperationService$MockitoMock$lDAfOMoM$auxiliary$ATxJgIg3</td>
+    <td class="name">OperationService$MockitoMock$VKDYSsQi$auxiliary$LfGUMnRH</td>
   </tr>
   <tr>
-    <td class="name">OperationService$MockitoMock$lDAfOMoM$auxiliary$vMmE9beN</td>
+    <td class="name">OperationService$MockitoMock$VKDYSsQi$auxiliary$toTFvV7G</td>
   </tr>
 <tr>
   <td class="name"><strong>Total</strong></td>
@@ -55,11 +55,13 @@ Current scope:     <a href="../../index.html">all classes</a>
 &nbsp;import org.springframework.stereotype.Service;
 &nbsp;import org.springframework.transaction.annotation.Transactional;
 &nbsp;
+&nbsp;import java.math.BigDecimal;
+&nbsp;
 &nbsp;@Service
 &nbsp;public interface OperationService {
 &nbsp;
-&nbsp;    Record doOperation(String token, String type, Double value1, Double value2);
-&nbsp;    Operation getOperation(String type, Double value1, Double value2);
+&nbsp;    Record doOperation(String token, String type, String value1Str, String value2Str);
+&nbsp;    Operation getOperation(String type, BigDecimal value1, BigDecimal value2);
 &nbsp;}
 </code>
 </pre>
@@ -84,7 +86,7 @@ Current scope:     <a href="../../index.html">all classes</a>
 
 <div class="footer">
     
-    <div style="float:right;">generated on 2024-11-24 22:22</div>
+    <div style="float:right;">generated on 2024-11-24 23:12</div>
 </div>
 </body>
 </html>

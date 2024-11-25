@@ -55,13 +55,13 @@ class OperationControllerTest {
 
         Record expectedRecord = new Record(mockOperation, mockUser, amount, userBalance, operationResponse);
 
-        when(operationService.doOperation(accessToken, type, values.value1(), values.value2()))
+        when(operationService.doOperation(accessToken, type, String.valueOf(values.value1()), String.valueOf(values.value2())))
                 .thenReturn(expectedRecord);
 
         ResponseEntity<Record> response = operationController.registerUser(accessToken, type, values);
 
         assertEquals(expectedRecord, response.getBody());
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        verify(operationService, times(1)).doOperation(accessToken, type, values.value1(), values.value2());
+        verify(operationService, times(1)).doOperation(accessToken, type, String.valueOf(values.value1()), String.valueOf(values.value2()));
     }
 }

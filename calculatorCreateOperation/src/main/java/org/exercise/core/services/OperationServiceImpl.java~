@@ -9,17 +9,20 @@ import org.exercise.core.enums.OperationType;
 import org.exercise.core.exceptions.BadRequestException;
 import org.exercise.core.exceptions.NotFoundException;
 import org.exercise.core.exceptions.PaymentRequiredException;
+import org.exercise.core.exceptions.UnsupportedOperationException;
 import org.exercise.core.interfaces.OperationService;
+import org.exercise.infrastructure.clients.RandomStringClient;
 import org.exercise.infrastructure.persistence.OperationRepository;
 import org.exercise.infrastructure.persistence.RecordRepository;
 import org.exercise.infrastructure.persistence.UserRepository;
-import org.exercise.core.exceptions.UnsupportedOperationException;
-import org.exercise.infrastructure.clients.RandomStringClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+import java.math.MathContext;
+import java.math.RoundingMode;
 import java.text.ParseException;
 import java.util.Optional;
 import java.util.UUID;
@@ -36,12 +39,16 @@ public class OperationServiceImpl implements OperationService {
     private final RandomStringClient client;
 
     @Transactional
-    public Record doOperation(String token, String type, Integer value1, Integer value2) {
+    public Record doOperation(String token, String type, String value1Str, String value2Str) {
         try {
             logger.info("Retrieving user ID from access token");
             UUID userId = getUserIdFromToken(token);
 
             User user = findUserById(userId);
+
+            BigDecimal value1 = value1Str != null ? parseBigDecimal(value1Str, "value1") : null;
+            BigDecimal value2 = value2Str != null ? parseBigDecimal(value2Str, "value2") : null;
+
             Operation operation = getOperation(type, value1, value2);
 
             User updatedUser = checkBalance(user, operation.getCost());
@@ -63,6 +70,14 @@ public class OperationServiceImpl implements OperationService {
         } catch (Exception e) {
             logger.error("Unexpected error occurred: {}", e.getMessage(), e);
             throw new RuntimeException("An unexpected error occurred. Please try again later.");
+        }
+    }
+
+    private BigDecimal parseBigDecimal(String valueStr, String valueName) {
+        try {
+            return new BigDecimal(valueStr);
+        } catch (NumberFormatException e) {
+            throw new BadRequestException("Invalid format for " + valueName + ": " + valueStr);
         }
     }
 
@@ -93,7 +108,7 @@ public class OperationServiceImpl implements OperationService {
         });
     }
 
-    public Operation getOperation(String type, Integer value1, Integer value2) {
+    public Operation getOperation(String type, BigDecimal value1, BigDecimal value2) {
         try {
             OperationType operationType = OperationType.valueOf(type.toUpperCase());
             checkValues(value1, value2, operationType);
@@ -108,7 +123,7 @@ public class OperationServiceImpl implements OperationService {
         }
     }
 
-    private void checkValues(Integer value1, Integer value2, OperationType operationType) {
+    private void checkValues(BigDecimal value1, BigDecimal value2, OperationType operationType) {
         boolean needTwoValues = operationType.getId() >= 1 && operationType.getId() < 4;
 
         if (value1 == null) {
@@ -132,68 +147,70 @@ public class OperationServiceImpl implements OperationService {
         return userRepository.save(user);
     }
 
-    String executeOperation(OperationType type, Integer value1, Integer value2) {
+    String executeOperation(OperationType type, BigDecimal value1, BigDecimal value2) {
         try {
-            return String.valueOf(switch (type) {
-                case ADDITION -> safeAdd(value1, value2);
-                case SUBTRACTION -> safeSubtract(value1, value2);
-                case MULTIPLICATION -> safeMultiply(value1, value2);
-                case DIVISION -> division(value1, value2);
-                case SQUARE_ROOT -> squareRoot(value1);
-                case RANDOM_STRING -> client.fetchRandomString(value1);
-            });
-        } catch (UnsupportedOperationException e) {
+            switch (type) {
+                case ADDITION:
+                    return formatBigDecimal(value1.add(value2));
+                case SUBTRACTION:
+                    return formatBigDecimal(value1.subtract(value2));
+                case MULTIPLICATION:
+                    return formatBigDecimal(value1.multiply(value2));
+                case DIVISION:
+                    return division(value1, value2);
+                case SQUARE_ROOT:
+                    return squareRoot(value1);
+                case RANDOM_STRING:
+                    return client.fetchRandomString(value1.intValue());
+                default:
+                    throw new UnsupportedOperationException("Unsupported operation type: " + type);
+            }
+        } catch (UnsupportedOperationException | ArithmeticException e) {
             logger.error("Error executing operation: {}", e.getMessage(), e);
             throw e;
         }
     }
 
-    private Integer safeAdd(Integer a, Integer b) {
-        try {
-            return Math.addExact(a, b);
-        } catch (ArithmeticException e) {
-            throw new UnsupportedOperationException("Integer overflow during addition", e.getMessage());
-        }
-    }
-
-    private Integer safeSubtract(Integer a, Integer b) {
-        try {
-            return Math.subtractExact(a, b);
-        } catch (ArithmeticException e) {
-            throw new UnsupportedOperationException("Integer underflow during subtraction", e.getMessage());
-        }
-    }
-
-    private Integer safeMultiply(Integer a, Integer b) {
-        try {
-            return Math.multiplyExact(a, b);
-        } catch (ArithmeticException e) {
-            throw new UnsupportedOperationException("Integer overflow during multiplication", e.getMessage());
-        }
-    }
-
-    private String division(Integer value1, Integer value2) {
-        if (value2 == 0) {
+    private String division(BigDecimal value1, BigDecimal value2) {
+        if (value2.compareTo(BigDecimal.ZERO) == 0) {
             throw new UnsupportedOperationException("Division by 0 is not possible");
         }
-
-        double result = (double) value1 / value2;
-        return (result % 1 == 0)
-                ? String.valueOf((int) result)
-                : String.format("%.2f", result).replace('.', ',');
+        BigDecimal result = value1.divide(value2, 15, RoundingMode.HALF_UP); // Adjust scale as needed
+        return formatBigDecimal(result);
     }
 
-    private Integer squareRoot(Integer value1) {
-        if (value1 < 0) {
+    private String squareRoot(BigDecimal value) {
+        if (value.compareTo(BigDecimal.ZERO) < 0) {
             throw new UnsupportedOperationException("Negative numbers don't have square roots");
         }
-        return (int) Math.sqrt(value1.doubleValue());
+        BigDecimal result = sqrt(value, new MathContext(15)); // Adjust precision as needed
+        return formatBigDecimal(result);
+    }
+
+    private BigDecimal sqrt(BigDecimal value, MathContext mc) {
+        BigDecimal x0 = BigDecimal.ZERO;
+        BigDecimal x1 = new BigDecimal(Math.sqrt(value.doubleValue()));
+        while (!x0.equals(x1)) {
+            x0 = x1;
+            x1 = value.divide(x0, mc);
+            x1 = x1.add(x0);
+            x1 = x1.divide(BigDecimal.valueOf(2), mc);
+        }
+        return x1;
+    }
+
+    private static String formatBigDecimal(BigDecimal result) {
+        if (result.scale() <= 0 || result.stripTrailingZeros().scale() <= 0) {
+            return result.setScale(0, RoundingMode.HALF_UP).toPlainString();
+        } else {
+            return result.stripTrailingZeros().toPlainString().replace('.', ',');
+        }
     }
 
     Record saveRecord(Operation operation, User user, String result) {
-        Record record = new Record(operation, user, operation.getCost(), user.getBalance().getAmount(), result);
+        Record recordObject = new Record(operation, user, operation.getCost(), user.getBalance().getAmount(), result);
         logger.info("Persisting record for operation: {} and user: {}", operation.getType(), user.getId());
 
-        return recordRepository.save(record);
+        return recordRepository.save(recordObject);
     }
 }
