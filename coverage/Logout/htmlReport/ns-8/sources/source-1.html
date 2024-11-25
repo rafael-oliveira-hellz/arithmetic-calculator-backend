@@ -5,7 +5,7 @@
 <html id="htmlId">
 <head>
   <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
-  <title>Coverage Report > UserService</title>
+  <title>Coverage Report > StreamLambdaHandler</title>
   <style type="text/css">
     @import "../../css/coverage.css";
     @import "../../css/idea.min.css";
@@ -19,28 +19,55 @@
 <div class="breadCrumbs">
 Current scope:     <a href="../../index.html">all classes</a>
     <span class="separator">|</span>
-    <a href="../index.html">org.exercise.core.interfaces</a>
+    <a href="../index.html">org.exercise.infrastructure.lambda</a>
 </div>
 
-<h1>Coverage Summary for Class: UserService (org.exercise.core.interfaces)</h1>
+<h1>Coverage Summary for Class: StreamLambdaHandler (org.exercise.infrastructure.lambda)</h1>
 
 <table class="coverageStats">
-
 <tr>
   <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
 </tr>
-  <tr>
-    <td class="name">UserService$MockitoMock$CKg4yTn9</td>
-  </tr>
-  <tr>
-    <td class="name">UserService$MockitoMock$CKg4yTn9$auxiliary$3a9l3Lrd</td>
-  </tr>
-  <tr>
-    <td class="name">UserService$MockitoMock$CKg4yTn9$auxiliary$a360ENiw</td>
-  </tr>
 <tr>
-  <td class="name"><strong>Total</strong></td>
+  <td class="name">StreamLambdaHandler</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (3/3)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    57,1%
+  </span>
+  <span class="absValue">
+    (8/14)
+  </span>
+</td>
 </tr>
+
 </table>
 
 <br/>
@@ -48,21 +75,49 @@ Current scope:     <a href="../../index.html">all classes</a>
 
 
 <pre>
-<code class="sourceCode" id="sourceCode">&nbsp;package org.exercise.core.interfaces;
+<code class="sourceCode" id="sourceCode">&nbsp;package org.exercise.infrastructure.lambda;
 &nbsp;
-&nbsp;import org.exercise.core.exceptions.LogoutException;
-&nbsp;import org.springframework.stereotype.Service;
-&nbsp;import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
-&nbsp;import software.amazon.awssdk.regions.Region;
-&nbsp;import software.amazon.awssdk.services.cognitoidentityprovider.CognitoIdentityProviderClient;
-&nbsp;import software.amazon.awssdk.services.cognitoidentityprovider.model.CognitoIdentityProviderException;
-&nbsp;import software.amazon.awssdk.services.cognitoidentityprovider.model.GlobalSignOutRequest;
 &nbsp;
-&nbsp;@Service
-&nbsp;public interface UserService {
+&nbsp;import com.amazonaws.serverless.exceptions.ContainerInitializationException;
+&nbsp;import com.amazonaws.serverless.proxy.model.AwsProxyRequest;
+&nbsp;import com.amazonaws.serverless.proxy.model.AwsProxyResponse;
+&nbsp;import com.amazonaws.serverless.proxy.spring.SpringBootLambdaContainerHandler;
+&nbsp;import com.amazonaws.services.lambda.runtime.Context;
+&nbsp;import com.amazonaws.services.lambda.runtime.RequestStreamHandler;
+&nbsp;import org.exercise.Application;
+&nbsp;import org.exercise.core.exceptions.InternalErrorException;
+&nbsp;import org.slf4j.Logger;
+&nbsp;import org.slf4j.LoggerFactory;
 &nbsp;
-&nbsp;    public void logoutUser(String accessToken);
+&nbsp;import java.io.IOException;
+&nbsp;import java.io.InputStream;
+&nbsp;import java.io.OutputStream;
 &nbsp;
+<b class="fc">&nbsp;public class StreamLambdaHandler implements RequestStreamHandler {</b>
+&nbsp;    private static final SpringBootLambdaContainerHandler&lt;AwsProxyRequest, AwsProxyResponse&gt; handler;
+<b class="fc">&nbsp;    private static final Logger logger = LoggerFactory.getLogger(StreamLambdaHandler.class);</b>
+&nbsp;
+&nbsp;    static {
+&nbsp;        try {
+<b class="fc">&nbsp;            handler = SpringBootLambdaContainerHandler.getAwsProxyHandler(Application.class);</b>
+<b class="nc">&nbsp;        } catch (ContainerInitializationException e) {</b>
+<b class="nc">&nbsp;            logger.error(e.getMessage());</b>
+<b class="nc">&nbsp;            throw new InternalErrorException(&quot;Could not initialize Spring Boot application&quot;, e);</b>
+<b class="fc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public void handleRequest(InputStream inputStream, OutputStream outputStream, Context context)
+&nbsp;            throws IOException {
+<b class="fc">&nbsp;                logger.info(&quot;Iniciando a requisição Lambda...&quot;);</b>
+&nbsp;                try {
+<b class="fc">&nbsp;                    handler.proxyStream(inputStream, outputStream, context);</b>
+<b class="fc">&nbsp;                    logger.info(&quot;Requisição processada com sucesso!&quot;);</b>
+<b class="nc">&nbsp;                } catch (Exception e) {</b>
+<b class="nc">&nbsp;                    logger.error(&quot;Erro ao processar a requisição: &quot;, e);</b>
+<b class="nc">&nbsp;                    throw e;</b>
+<b class="fc">&nbsp;                }</b>
+&nbsp;    }
 &nbsp;}
 </code>
 </pre>
@@ -87,7 +142,7 @@ Current scope:     <a href="../../index.html">all classes</a>
 
 <div class="footer">
     
-    <div style="float:right;">generated on 2024-11-21 00:54</div>
+    <div style="float:right;">generated on 2024-11-24 22:35</div>
 </div>
 </body>
 </html>

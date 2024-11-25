@@ -5,7 +5,7 @@
 <html id="htmlId">
 <head>
   <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
-  <title>Coverage Report > OperationServiceImpl</title>
+  <title>Coverage Report > InternalErrorException</title>
   <style type="text/css">
     @import "../../css/coverage.css";
     @import "../../css/idea.min.css";
@@ -19,10 +19,10 @@
 <div class="breadCrumbs">
 Current scope:     <a href="../../index.html">all classes</a>
     <span class="separator">|</span>
-    <a href="../index.html">org.exercise.core.services</a>
+    <a href="../index.html">org.exercise.core.exceptions</a>
 </div>
 
-<h1>Coverage Summary for Class: OperationServiceImpl (org.exercise.core.services)</h1>
+<h1>Coverage Summary for Class: InternalErrorException (org.exercise.core.exceptions)</h1>
 
 <table class="coverageStats">
 <tr>
@@ -41,7 +41,7 @@ Current scope:     <a href="../../index.html">all classes</a>
 </th>
 </tr>
 <tr>
-  <td class="name">OperationServiceImpl</td>
+  <td class="name">InternalErrorException</td>
 <td class="coverageStat">
   <span class="percent">
     100%
@@ -55,7 +55,7 @@ Current scope:     <a href="../../index.html">all classes</a>
     100%
   </span>
   <span class="absValue">
-    (3/3)
+    (1/1)
   </span>
 </td>
 <td class="coverageStat">
@@ -63,7 +63,7 @@ Current scope:     <a href="../../index.html">all classes</a>
     100%
   </span>
   <span class="absValue">
-    (6/6)
+    (1/1)
   </span>
 </td>
 </tr>
@@ -75,31 +75,12 @@ Current scope:     <a href="../../index.html">all classes</a>
 
 
 <pre>
-<code class="sourceCode" id="sourceCode">&nbsp;package org.exercise.core.services;
+<code class="sourceCode" id="sourceCode">&nbsp;package org.exercise.core.exceptions;
 &nbsp;
-&nbsp;import lombok.RequiredArgsConstructor;
-&nbsp;import org.exercise.core.entities.Operation;
-&nbsp;import org.exercise.core.interfaces.OperationService;
-&nbsp;import org.exercise.infrastructure.persistence.OperationRepository;
-&nbsp;import org.slf4j.Logger;
-&nbsp;import org.slf4j.LoggerFactory;
-&nbsp;import org.springframework.stereotype.Service;
+&nbsp;public class InternalErrorException extends RuntimeException {
 &nbsp;
-&nbsp;import java.util.List;
-&nbsp;
-&nbsp;@Service
-<b class="fc">&nbsp;@RequiredArgsConstructor</b>
-&nbsp;public class OperationServiceImpl implements OperationService {
-&nbsp;
-<b class="fc">&nbsp;    private static final Logger logger = LoggerFactory.getLogger(OperationServiceImpl.class);</b>
-&nbsp;    private final OperationRepository operationRepository;
-&nbsp;
-&nbsp;    @Override
-&nbsp;    public List&lt;Operation&gt; getOperations() {
-<b class="fc">&nbsp;        logger.info(&quot;Retrieving operation list...&quot;);</b>
-<b class="fc">&nbsp;        List&lt;Operation&gt; operations = operationRepository.findAll();</b>
-<b class="fc">&nbsp;        logger.info(&quot;List returned successfully&quot;);</b>
-<b class="fc">&nbsp;        return operations;</b>
+&nbsp;    public InternalErrorException(String message) {
+<b class="fc">&nbsp;        super(message);</b>
 &nbsp;    }
 &nbsp;}
 </code>
@@ -125,7 +106,7 @@ Current scope:     <a href="../../index.html">all classes</a>
 
 <div class="footer">
     
-    <div style="float:right;">generated on 2024-11-21 00:52</div>
+    <div style="float:right;">generated on 2024-11-24 22:28</div>
 </div>
 </body>
 </html>

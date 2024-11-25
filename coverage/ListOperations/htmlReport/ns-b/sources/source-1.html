@@ -5,7 +5,7 @@
 <html id="htmlId">
 <head>
   <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
-  <title>Coverage Report > OperationService</title>
+  <title>Coverage Report > OperationRepository</title>
   <style type="text/css">
     @import "../../css/coverage.css";
     @import "../../css/idea.min.css";
@@ -19,10 +19,10 @@
 <div class="breadCrumbs">
 Current scope:     <a href="../../index.html">all classes</a>
     <span class="separator">|</span>
-    <a href="../index.html">org.exercise.core.interfaces</a>
+    <a href="../index.html">org.exercise.infrastructure.persistence</a>
 </div>
 
-<h1>Coverage Summary for Class: OperationService (org.exercise.core.interfaces)</h1>
+<h1>Coverage Summary for Class: OperationRepository (org.exercise.infrastructure.persistence)</h1>
 
 <table class="coverageStats">
 
@@ -30,13 +30,13 @@ Current scope:     <a href="../../index.html">all classes</a>
   <th class="name">Class</th>
 </tr>
   <tr>
-    <td class="name">OperationService$MockitoMock$s6O8GHB5</td>
+    <td class="name">OperationRepository$MockitoMock$152OOqUN</td>
   </tr>
   <tr>
-    <td class="name">OperationService$MockitoMock$s6O8GHB5$auxiliary$iNeFU8lB</td>
+    <td class="name">OperationRepository$MockitoMock$152OOqUN$auxiliary$gr454QJh</td>
   </tr>
   <tr>
-    <td class="name">OperationService$MockitoMock$s6O8GHB5$auxiliary$OctK4kF7</td>
+    <td class="name">OperationRepository$MockitoMock$152OOqUN$auxiliary$NU5ZDaCi</td>
   </tr>
 <tr>
   <td class="name"><strong>Total</strong></td>
@@ -48,18 +48,14 @@ Current scope:     <a href="../../index.html">all classes</a>
 
 
 <pre>
-<code class="sourceCode" id="sourceCode">&nbsp;package org.exercise.core.interfaces;
+<code class="sourceCode" id="sourceCode">&nbsp;package org.exercise.infrastructure.persistence;
 &nbsp;
 &nbsp;import org.exercise.core.entities.Operation;
-&nbsp;import org.springframework.stereotype.Service;
+&nbsp;import org.springframework.data.jpa.repository.JpaRepository;
 &nbsp;
-&nbsp;import java.util.List;
+&nbsp;import java.util.UUID;
 &nbsp;
-&nbsp;@Service
-&nbsp;public interface OperationService {
-&nbsp;
-&nbsp;    public List&lt;Operation&gt; getOperations();
-&nbsp;
+&nbsp;public interface OperationRepository extends JpaRepository&lt;Operation, UUID&gt; {
 &nbsp;}
 </code>
 </pre>
@@ -84,7 +80,7 @@ Current scope:     <a href="../../index.html">all classes</a>
 
 <div class="footer">
     
-    <div style="float:right;">generated on 2024-11-21 00:52</div>
+    <div style="float:right;">generated on 2024-11-24 22:28</div>
 </div>
 </body>
 </html>

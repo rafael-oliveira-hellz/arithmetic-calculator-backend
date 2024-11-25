@@ -1,6 +1,7 @@
 package org.exercise.http.controllers;
 
 import org.exercise.core.dtos.Register;
+import org.exercise.core.dtos.ResponseTemplate;
 import org.exercise.core.interfaces.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -40,7 +41,7 @@ class RegisterControllerTest {
     void registerUser_shouldCallUserServiceAndReturnCreatedResponse() {
         Register dto = new Register("testUser", "Password123@", "test@example.com");
 
-        ResponseEntity<RegisterController.Response> response = registerController.registerUser(dto);
+        ResponseEntity<ResponseTemplate> response = registerController.registerUser(dto);
 
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
         assertEquals("User created successfully!", response.getBody().message());

@@ -17,7 +17,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-class RecordControllerTest {
+class OperationControllerTest {
 
     @Mock
     private OperationService operationService;

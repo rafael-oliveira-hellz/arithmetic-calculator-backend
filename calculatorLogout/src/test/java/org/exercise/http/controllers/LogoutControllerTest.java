@@ -1,5 +1,6 @@
 package org.exercise.http.controllers;
 
+import org.exercise.core.dtos.ResponseTemplate;
 import org.exercise.core.interfaces.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -39,7 +40,7 @@ class LogoutControllerTest {
     void testAuthenticateUser() {
         String accessToken = "mockAccessToken";
 
-        ResponseEntity<LogoutController.Response> response = logoutController.authenticateUser(accessToken);
+        ResponseEntity<ResponseTemplate> response = logoutController.authenticateUser(accessToken);
 
         ArgumentCaptor<String> tokenCaptor = ArgumentCaptor.forClass(String.class);
         verify(userService, times(1)).logoutUser(tokenCaptor.capture());

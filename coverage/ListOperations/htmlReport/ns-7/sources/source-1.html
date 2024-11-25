@@ -5,7 +5,7 @@
 <html id="htmlId">
 <head>
   <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
-  <title>Coverage Report > OperationController</title>
+  <title>Coverage Report > OperationServiceImpl</title>
   <style type="text/css">
     @import "../../css/coverage.css";
     @import "../../css/idea.min.css";
@@ -19,10 +19,10 @@
 <div class="breadCrumbs">
 Current scope:     <a href="../../index.html">all classes</a>
     <span class="separator">|</span>
-    <a href="../index.html">org.exercise.http.controllers</a>
+    <a href="../index.html">org.exercise.core.services</a>
 </div>
 
-<h1>Coverage Summary for Class: OperationController (org.exercise.http.controllers)</h1>
+<h1>Coverage Summary for Class: OperationServiceImpl (org.exercise.core.services)</h1>
 
 <table class="coverageStats">
 <tr>
@@ -41,7 +41,7 @@ Current scope:     <a href="../../index.html">all classes</a>
 </th>
 </tr>
 <tr>
-  <td class="name">OperationController</td>
+  <td class="name">OperationServiceImpl</td>
 <td class="coverageStat">
   <span class="percent">
     100%
@@ -63,7 +63,7 @@ Current scope:     <a href="../../index.html">all classes</a>
     100%
   </span>
   <span class="absValue">
-    (4/4)
+    (6/6)
   </span>
 </td>
 </tr>
@@ -75,34 +75,31 @@ Current scope:     <a href="../../index.html">all classes</a>
 
 
 <pre>
-<code class="sourceCode" id="sourceCode">&nbsp;package org.exercise.http.controllers;
+<code class="sourceCode" id="sourceCode">&nbsp;package org.exercise.core.services;
 &nbsp;
 &nbsp;import lombok.RequiredArgsConstructor;
 &nbsp;import org.exercise.core.entities.Operation;
 &nbsp;import org.exercise.core.interfaces.OperationService;
-&nbsp;import org.springframework.http.ResponseEntity;
-&nbsp;import org.springframework.web.bind.annotation.GetMapping;
-&nbsp;import org.springframework.web.bind.annotation.RequestMapping;
-&nbsp;import org.springframework.web.bind.annotation.RestController;
+&nbsp;import org.exercise.infrastructure.persistence.OperationRepository;
+&nbsp;import org.slf4j.Logger;
+&nbsp;import org.slf4j.LoggerFactory;
+&nbsp;import org.springframework.stereotype.Service;
 &nbsp;
 &nbsp;import java.util.List;
 &nbsp;
-&nbsp;@RestController
-&nbsp;@RequestMapping(&quot;/api/v1&quot;)
+&nbsp;@Service
 <b class="fc">&nbsp;@RequiredArgsConstructor</b>
-&nbsp;public class OperationController {
+&nbsp;public class OperationServiceImpl implements OperationService {
 &nbsp;
-&nbsp;    private final OperationService operationService;
+<b class="fc">&nbsp;    private static final Logger logger = LoggerFactory.getLogger(OperationServiceImpl.class);</b>
+&nbsp;    private final OperationRepository operationRepository;
 &nbsp;
-&nbsp;    @GetMapping(&quot;/check-status&quot;)
-&nbsp;    public ResponseEntity&lt;String&gt; checkStatus() {
-<b class="fc">&nbsp;        return ResponseEntity.ok(&quot;Status ok&quot;);</b>
-&nbsp;    }
-&nbsp;
-&nbsp;    @GetMapping(&quot;/operations&quot;)
-&nbsp;    public ResponseEntity&lt;List&lt;Operation&gt;&gt; getOperations() {
-<b class="fc">&nbsp;        List&lt;Operation&gt; operations = operationService.getOperations();</b>
-<b class="fc">&nbsp;        return ResponseEntity.ok(operations);</b>
+&nbsp;    @Override
+&nbsp;    public List&lt;Operation&gt; getOperations() {
+<b class="fc">&nbsp;        logger.info(&quot;Retrieving operation list...&quot;);</b>
+<b class="fc">&nbsp;        List&lt;Operation&gt; operations = operationRepository.findAll();</b>
+<b class="fc">&nbsp;        logger.info(&quot;List returned successfully&quot;);</b>
+<b class="fc">&nbsp;        return operations;</b>
 &nbsp;    }
 &nbsp;}
 </code>
@@ -128,7 +125,7 @@ Current scope:     <a href="../../index.html">all classes</a>
 
 <div class="footer">
     
-    <div style="float:right;">generated on 2024-11-21 00:52</div>
+    <div style="float:right;">generated on 2024-11-24 22:28</div>
 </div>
 </body>
 </html>

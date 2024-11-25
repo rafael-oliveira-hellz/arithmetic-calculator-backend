@@ -5,7 +5,7 @@
 <html id="htmlId">
 <head>
   <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
-  <title>Coverage Report > RecordRepository</title>
+  <title>Coverage Report > StreamLambdaHandler</title>
   <style type="text/css">
     @import "../../css/coverage.css";
     @import "../../css/idea.min.css";
@@ -19,28 +19,55 @@
 <div class="breadCrumbs">
 Current scope:     <a href="../../index.html">all classes</a>
     <span class="separator">|</span>
-    <a href="../index.html">org.exercise.infrastructure.persistence</a>
+    <a href="../index.html">org.exercise.infrastructure.lambda</a>
 </div>
 
-<h1>Coverage Summary for Class: RecordRepository (org.exercise.infrastructure.persistence)</h1>
+<h1>Coverage Summary for Class: StreamLambdaHandler (org.exercise.infrastructure.lambda)</h1>
 
 <table class="coverageStats">
-
 <tr>
   <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
 </tr>
-  <tr>
-    <td class="name">RecordRepository$MockitoMock$8xpe0uYf</td>
-  </tr>
-  <tr>
-    <td class="name">RecordRepository$MockitoMock$8xpe0uYf$auxiliary$T4jTbODs</td>
-  </tr>
-  <tr>
-    <td class="name">RecordRepository$MockitoMock$8xpe0uYf$auxiliary$xSeFg8Ne</td>
-  </tr>
 <tr>
-  <td class="name"><strong>Total</strong></td>
+  <td class="name">StreamLambdaHandler</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (3/3)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    62,5%
+  </span>
+  <span class="absValue">
+    (5/8)
+  </span>
+</td>
 </tr>
+
 </table>
 
 <br/>
@@ -48,28 +75,42 @@ Current scope:     <a href="../../index.html">all classes</a>
 
 
 <pre>
-<code class="sourceCode" id="sourceCode">&nbsp;package org.exercise.infrastructure.persistence;
+<code class="sourceCode" id="sourceCode">&nbsp;package org.exercise.infrastructure.lambda;
 &nbsp;
-&nbsp;import org.exercise.core.entities.Record;
-&nbsp;import org.exercise.core.entities.User;
-&nbsp;import org.springframework.data.domain.Page;
-&nbsp;import org.springframework.data.domain.Pageable;
-&nbsp;import org.springframework.data.jpa.repository.JpaRepository;
-&nbsp;import org.springframework.data.jpa.repository.Query;
-&nbsp;import org.springframework.data.repository.query.Param;
 &nbsp;
-&nbsp;import java.util.UUID;
+&nbsp;import com.amazonaws.serverless.exceptions.ContainerInitializationException;
+&nbsp;import com.amazonaws.serverless.proxy.model.AwsProxyRequest;
+&nbsp;import com.amazonaws.serverless.proxy.model.AwsProxyResponse;
+&nbsp;import com.amazonaws.serverless.proxy.spring.SpringBootLambdaContainerHandler;
+&nbsp;import com.amazonaws.services.lambda.runtime.Context;
+&nbsp;import com.amazonaws.services.lambda.runtime.RequestStreamHandler;
+&nbsp;import org.exercise.Application;
+&nbsp;import org.exercise.core.exceptions.InternalErrorException;
+&nbsp;import org.slf4j.Logger;
+&nbsp;import org.slf4j.LoggerFactory;
 &nbsp;
-&nbsp;public interface RecordRepository extends JpaRepository&lt;Record, UUID&gt; {
+&nbsp;import java.io.IOException;
+&nbsp;import java.io.InputStream;
+&nbsp;import java.io.OutputStream;
 &nbsp;
-&nbsp;    Page&lt;Record&gt; findAllByUserAndDeletedFalseOrderByDateAsc(User user, Pageable pageable);
+<b class="fc">&nbsp;public class StreamLambdaHandler implements RequestStreamHandler {</b>
+&nbsp;    private static final SpringBootLambdaContainerHandler&lt;AwsProxyRequest, AwsProxyResponse&gt; handler;
+<b class="fc">&nbsp;    private static final Logger logger = LoggerFactory.getLogger(StreamLambdaHandler.class);</b>
 &nbsp;
-&nbsp;    @Query(&quot;SELECT r FROM Record r &quot; +
-&nbsp;            &quot;JOIN FETCH r.operation o &quot; +
-&nbsp;            &quot;WHERE r.user.id = :userId &quot; +
-&nbsp;            &quot;AND r.deleted = false &quot; +
-&nbsp;            &quot;ORDER BY o.type ASC&quot;)
-&nbsp;    Page&lt;Record&gt; findAllByUserAndDeletedFalseOrderByOperationTypeAsc(@Param(&quot;userId&quot;) UUID userId, Pageable pageable);
+&nbsp;    static {
+&nbsp;        try {
+<b class="fc">&nbsp;            handler = SpringBootLambdaContainerHandler.getAwsProxyHandler(Application.class);</b>
+<b class="nc">&nbsp;        } catch (ContainerInitializationException e) {</b>
+<b class="nc">&nbsp;            logger.error(e.getMessage());</b>
+<b class="nc">&nbsp;            throw new InternalErrorException(&quot;Could not initialize Spring Boot application&quot;);</b>
+<b class="fc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public void handleRequest(InputStream inputStream, OutputStream outputStream, Context context)
+&nbsp;            throws IOException {
+<b class="fc">&nbsp;        handler.proxyStream(inputStream, outputStream, context);</b>
+&nbsp;    }
 &nbsp;}
 </code>
 </pre>
@@ -94,7 +135,7 @@ Current scope:     <a href="../../index.html">all classes</a>
 
 <div class="footer">
     
-    <div style="float:right;">generated on 2024-11-21 00:53</div>
+    <div style="float:right;">generated on 2024-11-24 22:29</div>
 </div>
 </body>
 </html>

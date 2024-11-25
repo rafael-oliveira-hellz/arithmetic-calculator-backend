@@ -1,0 +1,162 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > Operation</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.exercise.core.entities</a>
+</div>
+
+<h1>Coverage Summary for Class: Operation (org.exercise.core.entities)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">Operation</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (5/5)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (5/5)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">Operation$HibernateInstantiator$afXhkdQ7</td>
+  </tr>
+  <tr>
+    <td class="name">Operation$HibernateInstantiator$Rn2u4JqT</td>
+  </tr>
+  <tr>
+    <td class="name">Operation$HibernateInstantiator$x7gCkdZ6</td>
+  </tr>
+  <tr>
+    <td class="name">Operation$HibernateProxy$KRVlkwPE</td>
+  </tr>
+  <tr>
+    <td class="name">Operation$HibernateProxy$OsAgjT6S</td>
+  </tr>
+  <tr>
+    <td class="name">Operation$HibernateProxy$Z0LcWAKj</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (5/5)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (5/5)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package org.exercise.core.entities;
+&nbsp;
+&nbsp;import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+&nbsp;import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+&nbsp;import jakarta.persistence.*;
+&nbsp;import lombok.AllArgsConstructor;
+&nbsp;import lombok.Getter;
+&nbsp;import lombok.NoArgsConstructor;
+&nbsp;import lombok.Setter;
+&nbsp;import org.exercise.core.enums.OperationType;
+&nbsp;
+&nbsp;import java.util.UUID;
+&nbsp;
+&nbsp;@Getter
+<b class="fc">&nbsp;@Setter</b>
+&nbsp;@Entity
+<b class="fc">&nbsp;@NoArgsConstructor</b>
+&nbsp;@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = &quot;id&quot;)
+&nbsp;@Table(name = &quot;tb_operations&quot;)
+&nbsp;public class Operation {
+&nbsp;
+&nbsp;    @Id
+&nbsp;    @GeneratedValue(strategy = GenerationType.AUTO)
+<b class="fc">&nbsp;    private UUID id;</b>
+&nbsp;
+&nbsp;    @Enumerated(EnumType.STRING)
+&nbsp;    @Column(nullable = false, unique = true)
+<b class="fc">&nbsp;    private OperationType type;</b>
+&nbsp;
+&nbsp;    @Column(nullable = false)
+<b class="fc">&nbsp;    private Integer cost;</b>
+&nbsp;
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-11-24 22:29</div>
+</div>
+</body>
+</html>

@@ -2,6 +2,7 @@ package org.exercise.http.handlers;
 
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import jakarta.servlet.http.HttpServletRequest;
+import org.exercise.core.dtos.ResponseTemplate;
 import org.exercise.core.exceptions.ForbiddenException;
 import org.exercise.core.exceptions.InternalErrorException;
 import org.exercise.core.exceptions.NotFoundException;
@@ -34,49 +35,49 @@ class GlobalExceptionHandlerTest {
     @Test
     void handleInternalErrorException_shouldReturnInternalServerError() {
         InternalErrorException ex = new InternalErrorException("Internal error");
-        ResponseEntity<String> response = exceptionHandler.handleInternalErrorException(ex);
+        ResponseEntity<ResponseTemplate> response = exceptionHandler.handleInternalErrorException(ex);
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
-        assertEquals("Internal error", response.getBody());
+        assertEquals("Internal error", response.getBody().message());
     }
 
     @Test
     void handleForbiddenException_shouldReturnForbidden() {
         HttpServletRequest request = mock(HttpServletRequest.class);
         ForbiddenException ex = new ForbiddenException("Forbidden");
-        ResponseEntity<String> response = exceptionHandler.forbidden(ex, request);
+        ResponseEntity<ResponseTemplate> response = exceptionHandler.handleForbiddenException(ex, request);
         assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
-        assertEquals("Forbidden", response.getBody());
+        assertEquals("Forbidden", response.getBody().message());
     }
 
     @Test
     void handleNotFoundException_shouldReturnNotFound() {
         HttpServletRequest request = mock(HttpServletRequest.class);
         NotFoundException ex = new NotFoundException("Not found");
-        ResponseEntity<String> response = exceptionHandler.notFound(ex, request);
+        ResponseEntity<ResponseTemplate> response = exceptionHandler.handleNotFoundException(ex);
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-        assertEquals("Not found", response.getBody());
+        assertEquals("Not found", response.getBody().message());
     }
 
     @Test
-    void urlNotFound_shouldReturnNotFound() {
+    void handleUrlNotFoundException_shouldReturnNotFound() {
         HttpServletRequest request = mock(HttpServletRequest.class);
         NoHandlerFoundException ex = new NoHandlerFoundException("GET", "/test", null);
-        ResponseEntity<String> response = exceptionHandler.urlNotFound(ex, request);
+        ResponseEntity<ResponseTemplate> response = exceptionHandler.handleUrlNotFoundException(ex);
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-        assertEquals("A url requisitada não existe. Por favor confira se não houve erro de digitação", response.getBody());
+        assertEquals("No endpoint GET /test.", response.getBody().message());
     }
 
     @Test
-    void methodNotAllowed_shouldReturnMethodNotAllowed() {
+    void handleMethodNotAllowedException_shouldReturnMethodNotAllowed() {
         HttpServletRequest request = mock(HttpServletRequest.class);
         HttpRequestMethodNotSupportedException ex = new HttpRequestMethodNotSupportedException("POST");
-        ResponseEntity<String> response = exceptionHandler.methodNotAllowed(ex, request);
+        ResponseEntity<ResponseTemplate> response = exceptionHandler.handleMethodNotAllowedException(ex);
         assertEquals(HttpStatus.METHOD_NOT_ALLOWED, response.getStatusCode());
-        assertEquals("Request method 'POST' is not supported", response.getBody());
+        assertEquals("Request method 'POST' is not supported", response.getBody().message());
     }
 
     @Test
-    void conflict_shouldReturnConflict() {
+    void handleDataIntegrityViolationException_shouldReturnConflict() {
         HttpServletRequest request = mock(HttpServletRequest.class);
 
         org.hibernate.exception.ConstraintViolationException hibernateEx =
@@ -97,7 +98,7 @@ class GlobalExceptionHandlerTest {
 
 
     @Test
-    void conflict_shouldReturnUnprocessableEntity() {
+    void handleDataIntegrityViolationException_shouldReturnUnprocessableEntity() {
         HttpServletRequest request = mock(HttpServletRequest.class);
 
         org.hibernate.exception.ConstraintViolationException hibernateEx =
@@ -117,7 +118,7 @@ class GlobalExceptionHandlerTest {
     }
 
     @Test
-    void conflict_shouldReturnBadRequestForGenericCase() {
+    void handleDataIntegrityViolationException_shouldReturnBadRequestForGenericCase() {
         HttpServletRequest request = mock(HttpServletRequest.class);
         DataIntegrityViolationException ex = new DataIntegrityViolationException("Generic data integrity violation");
 
@@ -131,21 +132,21 @@ class GlobalExceptionHandlerTest {
     }
 
     @Test
-    void invalidAtribute_shouldReturnUnprocessableEntity() {
+    void handleInvalidAttributeException_shouldReturnUnprocessableEntity() {
         HttpServletRequest request = mock(HttpServletRequest.class);
         InvalidFormatException ex = mock(InvalidFormatException.class);
         String mockMessage = "Error occurred]]; default message [Invalid value]";
         when(ex.getLocalizedMessage()).thenReturn(mockMessage);
-        ResponseEntity<String> response = exceptionHandler.invalidAtribute(ex, request);
+        ResponseEntity<ResponseTemplate> response = exceptionHandler.handleInvalidAttributeException(ex);
         assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, response.getStatusCode());
-        assertEquals("Invalid value", response.getBody());
+        assertEquals("Invalid value", response.getBody().message());
     }
 
     @Test
     void handleGeneralException_shouldReturnInternalServerError() {
         Exception ex = new Exception("Unexpected error");
-        ResponseEntity<String> response = exceptionHandler.handleGeneralException(ex);
+        ResponseEntity<ResponseTemplate> response = exceptionHandler.handleGeneralException(ex);
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
-        assertEquals("An unexpected error occurred: Unexpected error", response.getBody());
+        assertEquals("An unexpected error occurred: Unexpected error", response.getBody().message());
     }
 }

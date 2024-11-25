@@ -89,7 +89,7 @@ class RecordServiceImplTest {
                 () -> recordService.deleteRecord(validToken, recordId)
         );
 
-        assertEquals("Record with id #" + recordId + " not found", exception.getMessage());
+        assertEquals("Record with ID #" + recordId + " not found", exception.getMessage());
         verify(recordRepository).findById(recordId);
         verify(recordRepository, never()).save(any());
     }
@@ -126,7 +126,7 @@ class RecordServiceImplTest {
             ForbiddenException exception = assertThrows(ForbiddenException.class,
                     () -> recordService.deleteRecord(validToken, recordId));
 
-            assertEquals(String.format("Record does not belong to the user. Token user ID: %s, Record owner ID: %s",
+            assertEquals(String.format("Unauthorized access: Record does not belong to the user. Token user ID: %s, Record owner ID: %s",
                             userId, anotherUserId), exception.getMessage());
 
             verify(recordRepository).findById(recordId);
@@ -140,7 +140,7 @@ class RecordServiceImplTest {
         when(recordRepository.findById(recordId)).thenReturn(Optional.of(recordObject));
 
         assertThrows(
-                IllegalArgumentException.class,
+                BadRequestException.class,
                 () -> recordService.deleteRecord(invalidToken, recordId)
         );
 

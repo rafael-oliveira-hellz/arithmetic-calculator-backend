@@ -30,17 +30,14 @@ class AuthControllerTest {
 
     @Test
     void checkStatusShouldReturnStatusOk() {
-        // Act
         ResponseEntity<String> response = authController.checkStatus();
 
-        // Assert
         assertEquals("Status ok", response.getBody());
         assertEquals(HttpStatus.OK, response.getStatusCode());
     }
 
     @Test
     void authenticateUserShouldReturnAuthResponse() {
-        // Arrange
         AuthDto authDto = new AuthDto("testUser", "password123");
         AuthResponse mockResponse = new AuthResponse(UUID.randomUUID(), "testUser", "testUser@email.com",
                 true, 100, "testAccessToken");

@@ -36,7 +36,7 @@ public class OperationServiceImpl implements OperationService {
     private final RandomStringClient client;
 
     @Transactional
-    public Record doOperation(String token, String type, Integer value1, Integer value2) {
+    public Record doOperation(String token, String type, Double value1, Double value2) {
         try {
             logger.info("Retrieving user ID from access token");
             UUID userId = getUserIdFromToken(token);
@@ -93,7 +93,7 @@ public class OperationServiceImpl implements OperationService {
         });
     }
 
-    public Operation getOperation(String type, Integer value1, Integer value2) {
+    public Operation getOperation(String type, Double value1, Double value2) {
         try {
             OperationType operationType = OperationType.valueOf(type.toUpperCase());
             checkValues(value1, value2, operationType);
@@ -108,7 +108,7 @@ public class OperationServiceImpl implements OperationService {
         }
     }
 
-    private void checkValues(Integer value1, Integer value2, OperationType operationType) {
+    private void checkValues(Double value1, Double value2, OperationType operationType) {
         boolean needTwoValues = operationType.getId() >= 1 && operationType.getId() < 4;
 
         if (value1 == null) {
@@ -132,68 +132,46 @@ public class OperationServiceImpl implements OperationService {
         return userRepository.save(user);
     }
 
-    String executeOperation(OperationType type, Integer value1, Integer value2) {
+    String executeOperation(OperationType type, Double value1, Double value2) {
         try {
-            return String.valueOf(switch (type) {
-                case ADDITION -> safeAdd(value1, value2);
-                case SUBTRACTION -> safeSubtract(value1, value2);
-                case MULTIPLICATION -> safeMultiply(value1, value2);
+            return switch (type) {
+                case ADDITION -> formatDouble(value1 + value2);
+                case SUBTRACTION -> formatDouble(value1 - value2);
+                case MULTIPLICATION -> formatDouble(value1 * value2);
                 case DIVISION -> division(value1, value2);
                 case SQUARE_ROOT -> squareRoot(value1);
                 case RANDOM_STRING -> client.fetchRandomString(value1);
-            });
-        } catch (UnsupportedOperationException e) {
+            };
+        } catch (UnsupportedOperationException | ArithmeticException e) {
             logger.error("Error executing operation: {}", e.getMessage(), e);
             throw e;
         }
     }
 
-    private Integer safeAdd(Integer a, Integer b) {
-        try {
-            return Math.addExact(a, b);
-        } catch (ArithmeticException e) {
-            throw new UnsupportedOperationException("Integer overflow during addition", e.getMessage());
-        }
-    }
-
-    private Integer safeSubtract(Integer a, Integer b) {
-        try {
-            return Math.subtractExact(a, b);
-        } catch (ArithmeticException e) {
-            throw new UnsupportedOperationException("Integer underflow during subtraction", e.getMessage());
-        }
-    }
-
-    private Integer safeMultiply(Integer a, Integer b) {
-        try {
-            return Math.multiplyExact(a, b);
-        } catch (ArithmeticException e) {
-            throw new UnsupportedOperationException("Integer overflow during multiplication", e.getMessage());
-        }
-    }
-
-    private String division(Integer value1, Integer value2) {
+    private String division(Double value1, Double value2) {
         if (value2 == 0) {
             throw new UnsupportedOperationException("Division by 0 is not possible");
         }
+        return formatDouble(value1 / value2);
+    }
 
-        double result = (double) value1 / value2;
+    private String squareRoot(Double value1) {
+        if (value1 < 0) {
+            throw new UnsupportedOperationException("Negative numbers don't have square roots");
+        }
+        return formatDouble(Math.sqrt(value1));
+    }
+
+    private static String formatDouble(double result) {
         return (result % 1 == 0)
                 ? String.valueOf((int) result)
                 : String.format("%.2f", result).replace('.', ',');
     }
 
-    private Integer squareRoot(Integer value1) {
-        if (value1 < 0) {
-            throw new UnsupportedOperationException("Negative numbers don't have square roots");
-        }
-        return (int) Math.sqrt(value1.doubleValue());
-    }
-
     Record saveRecord(Operation operation, User user, String result) {
-        Record record = new Record(operation, user, operation.getCost(), user.getBalance().getAmount(), result);
+        Record recordObject = new Record(operation, user, operation.getCost(), user.getBalance().getAmount(), result);
         logger.info("Persisting record for operation: {} and user: {}", operation.getType(), user.getId());
 
-        return recordRepository.save(record);
+        return recordRepository.save(recordObject);
     }
 }

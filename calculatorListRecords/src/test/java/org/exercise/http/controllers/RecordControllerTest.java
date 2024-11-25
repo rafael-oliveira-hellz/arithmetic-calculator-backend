@@ -47,8 +47,7 @@ class RecordControllerTest {
         int page = 0;
         int size = 10;
 
-        // Prepare mocked data
-        Record mockRecord = new Record(); // You can customize this with specific values if needed
+        Record mockRecord = new Record();
         List<Record> recordList = Collections.singletonList(mockRecord);
         Page<Record> mockPage = new PageImpl<>(recordList);
 
@@ -56,18 +55,21 @@ class RecordControllerTest {
 
         ResponseEntity<Page<Record>> response = recordController.getRecords(accessToken, page, size, "");
 
-        // Verify service interaction
         ArgumentCaptor<String> tokenCaptor = ArgumentCaptor.forClass(String.class);
         ArgumentCaptor<Integer> pageCaptor = ArgumentCaptor.forClass(Integer.class);
         ArgumentCaptor<Integer> sizeCaptor = ArgumentCaptor.forClass(Integer.class);
 
-        verify(recordService, times(1)).getRecords(tokenCaptor.capture(), pageCaptor.capture(), sizeCaptor.capture(), "");
+        verify(recordService, times(1)).getRecords(
+                tokenCaptor.capture(),
+                pageCaptor.capture(),
+                sizeCaptor.capture(),
+                eq("")
+        );
 
         assertEquals(accessToken, tokenCaptor.getValue());
         assertEquals(page, pageCaptor.getValue());
         assertEquals(size, sizeCaptor.getValue());
 
-        // Validate response
         assertNotNull(response);
         assertNotNull(response.getBody());
         assertEquals(HttpStatus.OK, response.getStatusCode());

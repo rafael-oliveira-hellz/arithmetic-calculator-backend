@@ -5,7 +5,7 @@
 <html id="htmlId">
 <head>
   <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
-  <title>Coverage Report > RecordController</title>
+  <title>Coverage Report > RecordServiceImpl</title>
   <style type="text/css">
     @import "../../css/coverage.css";
     @import "../../css/idea.min.css";
@@ -19,10 +19,10 @@
 <div class="breadCrumbs">
 Current scope:     <a href="../../index.html">all classes</a>
     <span class="separator">|</span>
-    <a href="../index.html">org.exercise.http.controllers</a>
+    <a href="../index.html">org.exercise.core.services</a>
 </div>
 
-<h1>Coverage Summary for Class: RecordController (org.exercise.http.controllers)</h1>
+<h1>Coverage Summary for Class: RecordServiceImpl (org.exercise.core.services)</h1>
 
 <table class="coverageStats">
 <tr>
@@ -41,7 +41,7 @@ Current scope:     <a href="../../index.html">all classes</a>
 </th>
 </tr>
 <tr>
-  <td class="name">RecordController</td>
+  <td class="name">RecordServiceImpl</td>
 <td class="coverageStat">
   <span class="percent">
     100%
@@ -55,15 +55,15 @@ Current scope:     <a href="../../index.html">all classes</a>
     100%
   </span>
   <span class="absValue">
-    (3/3)
+    (7/7)
   </span>
 </td>
 <td class="coverageStat">
   <span class="percent">
-    100%
+    96%
   </span>
   <span class="absValue">
-    (4/4)
+    (24/25)
   </span>
 </td>
 </tr>
@@ -75,35 +75,76 @@ Current scope:     <a href="../../index.html">all classes</a>
 
 
 <pre>
-<code class="sourceCode" id="sourceCode">&nbsp;package org.exercise.http.controllers;
+<code class="sourceCode" id="sourceCode">&nbsp;package org.exercise.core.services;
 &nbsp;
+&nbsp;import com.nimbusds.jwt.JWTClaimsSet;
+&nbsp;import com.nimbusds.jwt.SignedJWT;
 &nbsp;import lombok.RequiredArgsConstructor;
 &nbsp;import org.exercise.core.entities.Record;
+&nbsp;import org.exercise.core.entities.User;
+&nbsp;import org.exercise.core.exceptions.BadRequestException;
+&nbsp;import org.exercise.core.exceptions.NotFoundException;
 &nbsp;import org.exercise.core.interfaces.RecordService;
+&nbsp;import org.exercise.infrastructure.persistence.RecordRepository;
+&nbsp;import org.exercise.infrastructure.persistence.UserRepository;
+&nbsp;import org.slf4j.Logger;
+&nbsp;import org.slf4j.LoggerFactory;
 &nbsp;import org.springframework.data.domain.Page;
-&nbsp;import org.springframework.http.ResponseEntity;
-&nbsp;import org.springframework.web.bind.annotation.*;
+&nbsp;import org.springframework.data.domain.PageRequest;
+&nbsp;import org.springframework.data.domain.Pageable;
+&nbsp;import org.springframework.data.domain.Sort;
+&nbsp;import org.springframework.stereotype.Service;
 &nbsp;
-&nbsp;@RestController
-&nbsp;@RequestMapping(&quot;/api/v1&quot;)
+&nbsp;import java.text.ParseException;
+&nbsp;import java.util.Optional;
+&nbsp;import java.util.UUID;
+&nbsp;
+&nbsp;@Service
 <b class="fc">&nbsp;@RequiredArgsConstructor</b>
-&nbsp;public class RecordController {
+&nbsp;public class RecordServiceImpl implements RecordService {
 &nbsp;
-&nbsp;    private final RecordService recordService;
+<b class="fc">&nbsp;    private static final Logger logger = LoggerFactory.getLogger(RecordServiceImpl.class);</b>
 &nbsp;
-&nbsp;    @GetMapping(&quot;/check-status&quot;)
-&nbsp;    public ResponseEntity&lt;String&gt; checkStatus() {
-<b class="fc">&nbsp;        return ResponseEntity.ok(&quot;Status ok&quot;);</b>
+&nbsp;    private final RecordRepository recordRepository;
+&nbsp;    private final UserRepository userRepository;
+&nbsp;
+&nbsp;    public Page&lt;Record&gt; getRecords(String token, Integer page, Integer size, String orderedBy) {
+<b class="fc">&nbsp;        logger.info(&quot;Fetching user from access token&quot;);</b>
+<b class="fc">&nbsp;        UUID userId = getUserIdFromToken(token);</b>
+<b class="fc">&nbsp;        logger.info(&quot;User id found: {}&quot;, userId);</b>
+<b class="fc">&nbsp;        User user = userRepository.findById(userId).orElseThrow(() -&gt;</b>
+<b class="fc">&nbsp;                new NotFoundException(&quot;User was not found. Please try logging in again&quot;));</b>
+<b class="fc">&nbsp;        logger.info(&quot;User found. Retrieving user&#39;s records not deleted...&quot;);</b>
+<b class="fc">&nbsp;        Pageable pageable = PageRequest.of(page, size, Sort.by(&quot;date&quot;).descending());</b>
+<b class="fc">&nbsp;        Page&lt;Record&gt; records = getOrderedRecords(orderedBy, user, pageable);</b>
+<b class="fc">&nbsp;        logger.info(&quot;Records retrieved&quot;);</b>
+<b class="fc">&nbsp;        return records;</b>
 &nbsp;    }
 &nbsp;
-&nbsp;    @GetMapping(&quot;/records&quot;)
-&nbsp;    public ResponseEntity&lt;Page&lt;Record&gt;&gt; getRecords(@RequestHeader String accessToken,
-&nbsp;                                                   @RequestParam(defaultValue = &quot;0&quot;) Integer page,
-&nbsp;                                                   @RequestParam(defaultValue = &quot;10&quot;) Integer size,
-&nbsp;                                                    @RequestParam(defaultValue = &quot;data&quot;) String orderedBy) {
-<b class="fc">&nbsp;        Page&lt;Record&gt; records = recordService.getRecords(accessToken, page, size, orderedBy);</b>
-<b class="fc">&nbsp;        return ResponseEntity.ok(records);</b>
+&nbsp;    private Page&lt;Record&gt; getOrderedRecords(String orderedBy, User user, Pageable pageable) {
+<b class="fc">&nbsp;        return (!orderedBy.equalsIgnoreCase(&quot;operationType&quot;)) ?</b>
+<b class="fc">&nbsp;                recordRepository.findAllByUserAndDeletedFalseOrderByDateAsc(user, pageable) :</b>
+<b class="nc">&nbsp;                recordRepository.findAllByUserAndDeletedFalseOrderByOperationTypeAsc(user.getId(), pageable);</b>
 &nbsp;    }
+&nbsp;
+&nbsp;    private UUID getUserIdFromToken(String idToken) {
+&nbsp;        try {
+<b class="fc">&nbsp;            logger.info(&quot;Retrieving user id from token&quot;);</b>
+<b class="fc">&nbsp;            SignedJWT signedJWT = SignedJWT.parse(idToken);</b>
+<b class="fc">&nbsp;            return Optional.ofNullable(signedJWT.getJWTClaimsSet().getStringClaim(&quot;sub&quot;))</b>
+<b class="fc">&nbsp;                    .map(sub -&gt; {</b>
+&nbsp;                        try {
+<b class="fc">&nbsp;                            return UUID.fromString(sub);</b>
+<b class="fc">&nbsp;                        } catch (IllegalArgumentException e) {</b>
+<b class="fc">&nbsp;                            throw new BadRequestException(&quot;Token contains invalid user ID format: &quot; + sub + &quot;. &quot; + e);</b>
+&nbsp;                        }
+&nbsp;                    })
+<b class="fc">&nbsp;                    .orElseThrow(() -&gt; new BadRequestException(&quot;Token does not contain user ID&quot;));</b>
+<b class="fc">&nbsp;        } catch (ParseException | IllegalArgumentException e) {</b>
+<b class="fc">&nbsp;            throw new IllegalArgumentException(&quot;Invalid ID token or user ID format&quot;, e);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
 &nbsp;}
 </code>
 </pre>
@@ -128,7 +169,7 @@ Current scope:     <a href="../../index.html">all classes</a>
 
 <div class="footer">
     
-    <div style="float:right;">generated on 2024-11-21 00:53</div>
+    <div style="float:right;">generated on 2024-11-24 22:29</div>
 </div>
 </body>
 </html>

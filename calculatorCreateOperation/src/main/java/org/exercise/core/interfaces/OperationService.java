@@ -8,7 +8,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public interface OperationService {
 
-    @Transactional
-    public Record doOperation(String token, String type, Integer value1, Integer value2);
-    public Operation getOperation(String type, Integer value1, Integer value2);
+    Record doOperation(String token, String type, Double value1, Double value2);
+    Operation getOperation(String type, Double value1, Double value2);
 }

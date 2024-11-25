@@ -32,6 +32,13 @@ public class StreamLambdaHandler implements RequestStreamHandler {
     @Override
     public void handleRequest(InputStream inputStream, OutputStream outputStream, Context context)
             throws IOException {
-        handler.proxyStream(inputStream, outputStream, context);
+                logger.info("Iniciando a requisição Lambda...");
+                try {
+                    handler.proxyStream(inputStream, outputStream, context);
+                    logger.info("Requisição processada com sucesso!");
+                } catch (Exception e) {
+                    logger.error("Erro ao processar a requisição: ", e);
+                    throw e;
+                }
     }
 }

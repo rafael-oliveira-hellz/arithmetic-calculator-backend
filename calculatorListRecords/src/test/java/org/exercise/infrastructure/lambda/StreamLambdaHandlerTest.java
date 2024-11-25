@@ -16,6 +16,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.cloud.function.serverless.web.ServerlessAutoConfiguration;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -25,7 +26,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @TestInstance(TestInstance.Lifecycle.PER_METHOD)
 @SpringBootTest
-@ImportAutoConfiguration(exclude = {org.springframework.cloud.function.serverless.web.ServerlessAutoConfiguration.class})
+@ImportAutoConfiguration(exclude = {ServerlessAutoConfiguration.class})
 public class StreamLambdaHandlerTest {
 
     private static StreamLambdaHandler handler;

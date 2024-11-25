@@ -3,6 +3,7 @@ package org.exercise.http.controllers;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.exercise.core.dtos.Register;
+import org.exercise.core.dtos.ResponseTemplate;
 import org.exercise.core.interfaces.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,8 +23,8 @@ public class RegisterController {
     }
 
     @PostMapping("/signup")
-    public ResponseEntity<Response> registerUser(@RequestBody @Valid Register dto) {
+    public ResponseEntity<ResponseTemplate> registerUser(@RequestBody @Valid Register dto) {
         userService.registerUser(dto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(new Response("User created successfully!"));
+        return ResponseEntity.status(HttpStatus.CREATED).body(new ResponseTemplate("User created successfully!"));
     }
 }

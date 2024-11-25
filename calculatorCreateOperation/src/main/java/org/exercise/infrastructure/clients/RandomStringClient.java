@@ -21,9 +21,9 @@ public class RandomStringClient {
     private final String baseUrl = System.getenv("RSCLIENT_BASE_URL");
     private final String len = System.getenv("RSCLIENT_LEN");
 
-    public String fetchRandomString(Integer num) {
+    public String fetchRandomString(double num) {
         String url = String.format("%s?num=%d&len=%s&digits=off&upperalpha=on&loweralpha=on&unique=on&format=plain&rnd=new",
-                baseUrl, num, len);
+                baseUrl, (int) num, len);
         if (num < 0 || num > 10000) {
             throw new BadRequestException("Numeric value for Random String request cannot be negative nor greater than 10000");
         }

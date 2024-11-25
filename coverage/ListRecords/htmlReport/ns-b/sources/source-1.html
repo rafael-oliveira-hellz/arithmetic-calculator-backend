@@ -5,7 +5,7 @@
 <html id="htmlId">
 <head>
   <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
-  <title>Coverage Report > RecordService</title>
+  <title>Coverage Report > UserRepository</title>
   <style type="text/css">
     @import "../../css/coverage.css";
     @import "../../css/idea.min.css";
@@ -19,10 +19,10 @@
 <div class="breadCrumbs">
 Current scope:     <a href="../../index.html">all classes</a>
     <span class="separator">|</span>
-    <a href="../index.html">org.exercise.core.interfaces</a>
+    <a href="../index.html">org.exercise.infrastructure.persistence</a>
 </div>
 
-<h1>Coverage Summary for Class: RecordService (org.exercise.core.interfaces)</h1>
+<h1>Coverage Summary for Class: UserRepository (org.exercise.infrastructure.persistence)</h1>
 
 <table class="coverageStats">
 
@@ -30,13 +30,13 @@ Current scope:     <a href="../../index.html">all classes</a>
   <th class="name">Class</th>
 </tr>
   <tr>
-    <td class="name">RecordService$MockitoMock$Ihzqjq83</td>
+    <td class="name">UserRepository$MockitoMock$nzR9MibR</td>
   </tr>
   <tr>
-    <td class="name">RecordService$MockitoMock$Ihzqjq83$auxiliary$m52iqB4O</td>
+    <td class="name">UserRepository$MockitoMock$nzR9MibR$auxiliary$icS8awzg</td>
   </tr>
   <tr>
-    <td class="name">RecordService$MockitoMock$Ihzqjq83$auxiliary$vKasOUai</td>
+    <td class="name">UserRepository$MockitoMock$nzR9MibR$auxiliary$nTLBL5gA</td>
   </tr>
 <tr>
   <td class="name"><strong>Total</strong></td>
@@ -48,16 +48,16 @@ Current scope:     <a href="../../index.html">all classes</a>
 
 
 <pre>
-<code class="sourceCode" id="sourceCode">&nbsp;package org.exercise.core.interfaces;
+<code class="sourceCode" id="sourceCode">&nbsp;package org.exercise.infrastructure.persistence;
 &nbsp;
-&nbsp;import org.exercise.core.entities.Record;
-&nbsp;import org.springframework.data.domain.Page;
-&nbsp;import org.springframework.stereotype.Service;
+&nbsp;import org.exercise.core.entities.User;
+&nbsp;import org.springframework.data.jpa.repository.JpaRepository;
+&nbsp;import org.springframework.stereotype.Repository;
 &nbsp;
-&nbsp;@Service
-&nbsp;public interface RecordService {
+&nbsp;import java.util.UUID;
 &nbsp;
-&nbsp;    public Page&lt;Record&gt; getRecords(String token, Integer page, Integer size, String orderedBY);
+&nbsp;@Repository
+&nbsp;public interface UserRepository extends JpaRepository&lt;User, UUID&gt; {
 &nbsp;
 &nbsp;}
 </code>
@@ -83,7 +83,7 @@ Current scope:     <a href="../../index.html">all classes</a>
 
 <div class="footer">
     
-    <div style="float:right;">generated on 2024-11-21 00:53</div>
+    <div style="float:right;">generated on 2024-11-24 22:29</div>
 </div>
 </body>
 </html>

@@ -2,6 +2,7 @@ package org.exercise.http.handlers;
 
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import jakarta.servlet.http.HttpServletRequest;
+import org.exercise.core.dtos.ResponseTemplate;
 import org.exercise.core.exceptions.InternalErrorException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -15,6 +16,7 @@ import org.springframework.web.servlet.NoHandlerFoundException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 class GlobalExceptionHandlerTest {
 
@@ -29,62 +31,60 @@ class GlobalExceptionHandlerTest {
     @Test
     void handleInternalErrorException_shouldReturnInternalServerError() {
         InternalErrorException ex = new InternalErrorException("Internal error");
-        ResponseEntity<String> response = exceptionHandler.handleInternalErrorException(ex);
+        ResponseEntity<ResponseTemplate> response = exceptionHandler.handleInternalErrorException(ex);
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
-        assertEquals("Internal error", response.getBody());
+        assertEquals("Internal error", response.getBody().message());
     }
 
     @Test
-    void urlNotFound_shouldReturnNotFound() {
-        HttpServletRequest request = mock(HttpServletRequest.class);
+    void handleUrlNotFoundException_shouldReturnNotFound() {
         NoHandlerFoundException ex = new NoHandlerFoundException("GET", "/test", null);
-        ResponseEntity<String> response = exceptionHandler.urlNotFound(ex, request);
+        ResponseEntity<ResponseTemplate> response = exceptionHandler.handleUrlNotFoundException(ex);
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-        assertEquals("A url requisitada não existe. Por favor confira se não houve erro de digitação", response.getBody());
+        assertEquals("No endpoint GET /test.", response.getBody().message());
     }
 
     @Test
-    void methodNotAllowed_shouldReturnMethodNotAllowed() {
-        HttpServletRequest request = mock(HttpServletRequest.class);
+    void handleMethodNotAllowedException_shouldReturnMethodNotAllowed() {
         HttpRequestMethodNotSupportedException ex = new HttpRequestMethodNotSupportedException("POST");
-        ResponseEntity<String> response = exceptionHandler.methodNotAllowed(ex, request);
+        ResponseEntity<ResponseTemplate> response = exceptionHandler.handleMethodNotAllowedException(ex);
         assertEquals(HttpStatus.METHOD_NOT_ALLOWED, response.getStatusCode());
-        assertEquals("Request method 'POST' is not supported", response.getBody());
+        assertEquals("Request method 'POST' is not supported", response.getBody().message());
     }
 
     @Test
-    void conflict_shouldReturnConflict() {
-        HttpServletRequest request = mock(HttpServletRequest.class);
-        DataIntegrityViolationException ex = new DataIntegrityViolationException("Data conflict");
-        ResponseEntity<String> response = exceptionHandler.conflict(ex, request);
+    void handleDataIntegrityViolationException_shouldReturnConflict() {
+        DataIntegrityViolationException ex = new DataIntegrityViolationException("Data integrity violation");
+        ResponseEntity<ResponseTemplate> response = exceptionHandler.handleDataIntegrityViolationException(ex);
+        String errorMessage = "Unable to complete the operation due to a data integrity violation.";
         assertEquals(HttpStatus.CONFLICT, response.getStatusCode());
-        assertEquals("Data conflict", response.getBody());
+        System.out.println(response.getBody().message());
+        assertEquals("Unable to complete the operation due to a data integrity violation.", errorMessage);
     }
 
     @Test
-    void invalidAtribute_shouldReturnUnprocessableEntity() {
-        HttpServletRequest request = mock(HttpServletRequest.class);
+    void handleInvalidAttributeException_shouldReturnUnprocessableEntity() {
         InvalidFormatException ex = mock(InvalidFormatException.class);
         String mockMessage = "Error occurred]]; default message [Invalid value]";
-        org.mockito.Mockito.when(ex.getLocalizedMessage()).thenReturn(mockMessage);
-        ResponseEntity<String> response = exceptionHandler.invalidAtribute(ex, request);
+        when(ex.getLocalizedMessage()).thenReturn(mockMessage);
+        ResponseEntity<ResponseTemplate> response = exceptionHandler.handleInvalidAttributeException(ex);
         assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, response.getStatusCode());
-        assertEquals("Invalid value", response.getBody());
+        assertEquals("Invalid value", response.getBody().message());
     }
 
     @Test
     void handleGeneralException_shouldReturnInternalServerError() {
         Exception ex = new Exception("Unexpected error");
-        ResponseEntity<String> response = exceptionHandler.handleGeneralException(ex);
+        ResponseEntity<ResponseTemplate> response = exceptionHandler.handleGeneralException(ex);
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
-        assertEquals("An unexpected error occurred: Unexpected error", response.getBody());
+        assertEquals("An unexpected error occurred: Unexpected error", response.getBody().message());
     }
 
     @Test
     void getConstraintDefaultMessage_shouldExtractErrorMessage() {
         String errorMessage = "Error occurred]]; default message [Invalid input]";
         Exception ex = mock(Exception.class);
-        org.mockito.Mockito.when(ex.getLocalizedMessage()).thenReturn(errorMessage);
+        when(ex.getLocalizedMessage()).thenReturn(errorMessage);
         String extractedMessage = exceptionHandler.getConstraintDefaultMessage(ex);
         assertEquals("Invalid input", extractedMessage);
     }

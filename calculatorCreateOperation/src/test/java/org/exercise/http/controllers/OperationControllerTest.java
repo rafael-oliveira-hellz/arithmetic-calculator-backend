@@ -43,14 +43,12 @@ class OperationControllerTest {
 
     @Test
     void registerUser_shouldReturnRecordResponse() {
-        // Arrange
         String accessToken = "dummyAccessToken";
         String type = "exampleType";
-        Values values = new Values(10, 20);
+        Values values = new Values(10.0, 20.0);
 
-        // Mocked data for Record entity
-        Operation mockOperation = new Operation(); // You can configure the operation if needed
-        User mockUser = new User(); // You can configure the user if needed
+        Operation mockOperation = new Operation();
+        User mockUser = new User();
         Integer amount = 10;
         Integer userBalance = 90;
         String operationResponse = "Success";
@@ -60,10 +58,8 @@ class OperationControllerTest {
         when(operationService.doOperation(accessToken, type, values.value1(), values.value2()))
                 .thenReturn(expectedRecord);
 
-        // Act
         ResponseEntity<Record> response = operationController.registerUser(accessToken, type, values);
 
-        // Assert
         assertEquals(expectedRecord, response.getBody());
         assertEquals(HttpStatus.OK, response.getStatusCode());
         verify(operationService, times(1)).doOperation(accessToken, type, values.value1(), values.value2());

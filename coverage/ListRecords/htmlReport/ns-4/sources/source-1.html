@@ -5,7 +5,7 @@
 <html id="htmlId">
 <head>
   <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
-  <title>Coverage Report > OperationType</title>
+  <title>Coverage Report > Balance</title>
   <style type="text/css">
     @import "../../css/coverage.css";
     @import "../../css/idea.min.css";
@@ -19,18 +19,15 @@
 <div class="breadCrumbs">
 Current scope:     <a href="../../index.html">all classes</a>
     <span class="separator">|</span>
-    <a href="../index.html">org.exercise.core.enums</a>
+    <a href="../index.html">org.exercise.core.entities</a>
 </div>
 
-<h1>Coverage Summary for Class: OperationType (org.exercise.core.enums)</h1>
+<h1>Coverage Summary for Class: Balance (org.exercise.core.entities)</h1>
 
 <table class="coverageStats">
+
 <tr>
   <th class="name">Class</th>
-<th class="coverageStat 
-">
-  Class, %
-</th>
 <th class="coverageStat 
 ">
   Method, %
@@ -41,15 +38,7 @@ Current scope:     <a href="../../index.html">all classes</a>
 </th>
 </tr>
 <tr>
-  <td class="name">OperationType</td>
-<td class="coverageStat">
-  <span class="percent">
-    100%
-  </span>
-  <span class="absValue">
-    (1/1)
-  </span>
-</td>
+  <td class="name">Balance</td>
 <td class="coverageStat">
   <span class="percent">
     100%
@@ -63,11 +52,47 @@ Current scope:     <a href="../../index.html">all classes</a>
     100%
   </span>
   <span class="absValue">
-    (10/10)
+    (4/4)
   </span>
 </td>
 </tr>
-
+  <tr>
+    <td class="name">Balance$HibernateInstantiator$IWIjK0s5</td>
+  </tr>
+  <tr>
+    <td class="name">Balance$HibernateInstantiator$lqjEgn2p</td>
+  </tr>
+  <tr>
+    <td class="name">Balance$HibernateInstantiator$qFNEfSu1</td>
+  </tr>
+  <tr>
+    <td class="name">Balance$HibernateProxy$liP3dz0v</td>
+  </tr>
+  <tr>
+    <td class="name">Balance$HibernateProxy$rjNnPNVb</td>
+  </tr>
+  <tr>
+    <td class="name">Balance$HibernateProxy$u3iPEchf</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (4/4)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (4/4)
+  </span>
+</td>
+</tr>
 </table>
 
 <br/>
@@ -75,25 +100,32 @@ Current scope:     <a href="../../index.html">all classes</a>
 
 
 <pre>
-<code class="sourceCode" id="sourceCode">&nbsp;package org.exercise.core.enums;
+<code class="sourceCode" id="sourceCode">&nbsp;package org.exercise.core.entities;
 &nbsp;
+&nbsp;import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+&nbsp;import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+&nbsp;import jakarta.persistence.*;
+&nbsp;import lombok.AllArgsConstructor;
 &nbsp;import lombok.Getter;
+&nbsp;import lombok.NoArgsConstructor;
+&nbsp;import lombok.Setter;
 &nbsp;
-<b class="fc">&nbsp;@Getter</b>
-&nbsp;public enum OperationType {
+&nbsp;import java.util.UUID;
 &nbsp;
-<b class="fc">&nbsp;    ADDITION(0),</b>
-<b class="fc">&nbsp;    SUBTRACTION(1),</b>
-<b class="fc">&nbsp;    MULTIPLICATION(2),</b>
-<b class="fc">&nbsp;    DIVISION(3),</b>
-<b class="fc">&nbsp;    SQUARE_ROOT(4),</b>
-<b class="fc">&nbsp;    RANDOM_STRING(5);</b>
+&nbsp;@Getter
+<b class="fc">&nbsp;@Setter</b>
+&nbsp;@Entity
+<b class="fc">&nbsp;@NoArgsConstructor</b>
+&nbsp;@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = &quot;id&quot;)
+&nbsp;@Table(name = &quot;tb_balances&quot;)
+&nbsp;public class Balance {
 &nbsp;
-<b class="fc">&nbsp;    private final Integer id;</b>
+&nbsp;    @Id
+&nbsp;    @GeneratedValue(strategy = GenerationType.AUTO)
+<b class="fc">&nbsp;    private UUID id;</b>
 &nbsp;
-<b class="fc">&nbsp;    OperationType(int i) {</b>
-<b class="fc">&nbsp;        this.id = i;</b>
-&nbsp;    }
+&nbsp;    @Column(nullable = false)
+<b class="fc">&nbsp;    private Integer amount;</b>
 &nbsp;
 &nbsp;}
 </code>
@@ -119,7 +151,7 @@ Current scope:     <a href="../../index.html">all classes</a>
 
 <div class="footer">
     
-    <div style="float:right;">generated on 2024-11-21 00:53</div>
+    <div style="float:right;">generated on 2024-11-24 22:29</div>
 </div>
 </body>
 </html>

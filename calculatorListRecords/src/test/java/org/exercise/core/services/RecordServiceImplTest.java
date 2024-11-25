@@ -44,16 +44,14 @@ class RecordServiceImplTest {
 
     @Test
     void testGetRecords_Success() throws Exception {
-        // Arrange
         String token = "validToken";
         UUID userId = UUID.randomUUID();
-        User user = new User(); // Customize user object as needed
+        User user = new User();
         Page<Record> mockPage = new PageImpl<>(Collections.singletonList(new Record()));
 
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
         when(recordRepository.findAllByUserAndDeletedFalseOrderByDateAsc(eq(user), any(Pageable.class))).thenReturn(mockPage);
 
-        // Mock static SignedJWT behavior
         SignedJWT signedJWT = mock(SignedJWT.class);
         JWTClaimsSet jwtClaimsSet = mock(JWTClaimsSet.class);
 
@@ -62,10 +60,8 @@ class RecordServiceImplTest {
             when(signedJWT.getJWTClaimsSet()).thenReturn(jwtClaimsSet);
             when(jwtClaimsSet.getStringClaim("sub")).thenReturn(userId.toString());
 
-            // Act
             Page<Record> result = recordService.getRecords(token, 0, 10, "");
 
-            // Assert
             assertNotNull(result);
             assertEquals(1, result.getTotalElements());
             verify(userRepository, times(1)).findById(userId);
@@ -75,11 +71,9 @@ class RecordServiceImplTest {
 
     @Test
     void testGetRecords_UserNotFound() throws Exception {
-        // Arrange
         String token = "validToken";
         UUID userId = UUID.randomUUID();
 
-        // Mock static SignedJWT behavior
         SignedJWT signedJWT = mock(SignedJWT.class);
         JWTClaimsSet jwtClaimsSet = mock(JWTClaimsSet.class);
 
@@ -88,10 +82,8 @@ class RecordServiceImplTest {
             when(signedJWT.getJWTClaimsSet()).thenReturn(jwtClaimsSet);
             when(jwtClaimsSet.getStringClaim("sub")).thenReturn(userId.toString());
 
-            // Simulate user not found
             when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
-            // Act & Assert
             NotFoundException exception = assertThrows(NotFoundException.class, () -> {
                 recordService.getRecords(token, 0, 10, "");
             });
@@ -102,13 +94,11 @@ class RecordServiceImplTest {
 
     @Test
     void testGetUserIdFromToken_InvalidTokenFormat() {
-        // Arrange
         String invalidToken = "invalidToken";
 
         try (MockedStatic<SignedJWT> mockedJWT = mockStatic(SignedJWT.class)) {
             mockedJWT.when(() -> SignedJWT.parse(invalidToken)).thenThrow(new ParseException("Invalid token", 0));
 
-            // Act & Assert
             IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
                 recordService.getRecords(invalidToken, 0, 10, "");
             });
@@ -118,10 +108,8 @@ class RecordServiceImplTest {
 
     @Test
     void testGetUserIdFromToken_MissingUserId() throws Exception {
-        // Arrange
         String token = "validToken";
 
-        // Mock static SignedJWT behavior
         SignedJWT signedJWT = mock(SignedJWT.class);
         JWTClaimsSet jwtClaimsSet = mock(JWTClaimsSet.class);
 
@@ -130,7 +118,6 @@ class RecordServiceImplTest {
             when(signedJWT.getJWTClaimsSet()).thenReturn(jwtClaimsSet);
             when(jwtClaimsSet.getStringClaim("sub")).thenReturn(null);
 
-            // Act & Assert
             BadRequestException exception = assertThrows(BadRequestException.class, () -> {
                 recordService.getRecords(token, 0, 10, "");
             });
@@ -140,11 +127,9 @@ class RecordServiceImplTest {
 
     @Test
     void testGetUserIdFromToken_InvalidUUIDFormat() throws Exception {
-        // Arrange
         String token = "validToken";
         String invalidUUID = "invalid-uuid-format";
 
-        // Mock static SignedJWT behavior
         SignedJWT signedJWT = mock(SignedJWT.class);
         JWTClaimsSet jwtClaimsSet = mock(JWTClaimsSet.class);
 
@@ -153,7 +138,6 @@ class RecordServiceImplTest {
             when(signedJWT.getJWTClaimsSet()).thenReturn(jwtClaimsSet);
             when(jwtClaimsSet.getStringClaim("sub")).thenReturn(invalidUUID);
 
-            // Act & Assert
             BadRequestException exception = assertThrows(BadRequestException.class, () -> {
                 recordService.getRecords(token, 0, 10, "");
             });
@@ -162,5 +146,4 @@ class RecordServiceImplTest {
             assertTrue(exception.getMessage().contains(invalidUUID));
         }
     }
-
 }

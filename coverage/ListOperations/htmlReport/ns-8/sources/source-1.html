@@ -5,7 +5,7 @@
 <html id="htmlId">
 <head>
   <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
-  <title>Coverage Report > GlobalExceptionHandler</title>
+  <title>Coverage Report > OperationController</title>
   <style type="text/css">
     @import "../../css/coverage.css";
     @import "../../css/idea.min.css";
@@ -19,10 +19,10 @@
 <div class="breadCrumbs">
 Current scope:     <a href="../../index.html">all classes</a>
     <span class="separator">|</span>
-    <a href="../index.html">org.exercise.http.handlers</a>
+    <a href="../index.html">org.exercise.http.controllers</a>
 </div>
 
-<h1>Coverage Summary for Class: GlobalExceptionHandler (org.exercise.http.handlers)</h1>
+<h1>Coverage Summary for Class: OperationController (org.exercise.http.controllers)</h1>
 
 <table class="coverageStats">
 <tr>
@@ -41,7 +41,7 @@ Current scope:     <a href="../../index.html">all classes</a>
 </th>
 </tr>
 <tr>
-  <td class="name">GlobalExceptionHandler</td>
+  <td class="name">OperationController</td>
 <td class="coverageStat">
   <span class="percent">
     100%
@@ -55,7 +55,7 @@ Current scope:     <a href="../../index.html">all classes</a>
     100%
   </span>
   <span class="absValue">
-    (10/10)
+    (3/3)
   </span>
 </td>
 <td class="coverageStat">
@@ -63,7 +63,7 @@ Current scope:     <a href="../../index.html">all classes</a>
     100%
   </span>
   <span class="absValue">
-    (26/26)
+    (4/4)
   </span>
 </td>
 </tr>
@@ -75,88 +75,36 @@ Current scope:     <a href="../../index.html">all classes</a>
 
 
 <pre>
-<code class="sourceCode" id="sourceCode">&nbsp;package org.exercise.http.handlers;
+<code class="sourceCode" id="sourceCode">&nbsp;package org.exercise.http.controllers;
 &nbsp;
-&nbsp;import com.fasterxml.jackson.databind.exc.InvalidFormatException;
-&nbsp;import jakarta.servlet.http.HttpServletRequest;
-&nbsp;import org.exercise.core.exceptions.InternalErrorException;
-&nbsp;import org.slf4j.Logger;
-&nbsp;import org.slf4j.LoggerFactory;
-&nbsp;import org.springframework.dao.DataIntegrityViolationException;
-&nbsp;import org.springframework.http.HttpStatus;
+&nbsp;import lombok.RequiredArgsConstructor;
+&nbsp;import org.exercise.core.entities.Operation;
+&nbsp;import org.exercise.core.interfaces.OperationService;
 &nbsp;import org.springframework.http.ResponseEntity;
-&nbsp;import org.springframework.web.HttpRequestMethodNotSupportedException;
-&nbsp;import org.springframework.web.bind.MethodArgumentNotValidException;
-&nbsp;import org.springframework.web.bind.annotation.ExceptionHandler;
-&nbsp;import org.springframework.web.bind.annotation.RestControllerAdvice;
-&nbsp;import org.springframework.web.servlet.NoHandlerFoundException;
-&nbsp;import org.springframework.web.servlet.config.annotation.EnableWebMvc;
+&nbsp;import org.springframework.web.bind.annotation.GetMapping;
+&nbsp;import org.springframework.web.bind.annotation.RequestMapping;
+&nbsp;import org.springframework.web.bind.annotation.RestController;
 &nbsp;
-&nbsp;import java.time.format.DateTimeParseException;
+&nbsp;import java.util.List;
 &nbsp;
-&nbsp;@EnableWebMvc
-&nbsp;@RestControllerAdvice
-<b class="fc">&nbsp;public class GlobalExceptionHandler {</b>
+&nbsp;@RestController
+&nbsp;@RequestMapping(&quot;/api/v1&quot;)
+<b class="fc">&nbsp;@RequiredArgsConstructor</b>
+&nbsp;public class OperationController {
 &nbsp;
-<b class="fc">&nbsp;    private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);</b>
+&nbsp;    private final OperationService operationService;
 &nbsp;
-&nbsp;    @ExceptionHandler(InternalErrorException.class)
-&nbsp;    public ResponseEntity&lt;String&gt; handleInternalErrorException(InternalErrorException ex) {
-<b class="fc">&nbsp;        logError(ex, &quot;Internal server error&quot;);</b>
-<b class="fc">&nbsp;        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ex.getMessage());</b>
+&nbsp;    @GetMapping(&quot;/check-status&quot;)
+&nbsp;    public ResponseEntity&lt;String&gt; checkStatus() {
+<b class="fc">&nbsp;        return ResponseEntity.ok(&quot;Status ok&quot;);</b>
 &nbsp;    }
 &nbsp;
-&nbsp;    @ExceptionHandler({NoHandlerFoundException.class})
-&nbsp;    public ResponseEntity&lt;String&gt; urlNotFound(Exception ex , HttpServletRequest request) {
-<b class="fc">&nbsp;        String body = &quot;Requested url does not exist&quot;;</b>
-<b class="fc">&nbsp;        logError(ex, body);</b>
-<b class="fc">&nbsp;        return ResponseEntity.status(HttpStatus.NOT_FOUND)</b>
-<b class="fc">&nbsp;                .body(body);</b>
+&nbsp;    @GetMapping(&quot;/operations&quot;)
+&nbsp;    public ResponseEntity&lt;List&lt;Operation&gt;&gt; getOperations() {
+<b class="fc">&nbsp;        List&lt;Operation&gt; operations = operationService.getOperations();</b>
+<b class="fc">&nbsp;        return ResponseEntity.ok(operations);</b>
 &nbsp;    }
-&nbsp;    
-&nbsp;    @ExceptionHandler({HttpRequestMethodNotSupportedException.class})
-&nbsp;    public ResponseEntity&lt;String&gt; methodNotAllowed(Exception ex , HttpServletRequest request) {
-<b class="fc">&nbsp;        logError(ex, &quot;Method not allowed&quot;);</b>
-<b class="fc">&nbsp;        return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).body(ex.getLocalizedMessage());</b>
-&nbsp;    }
-&nbsp;
-&nbsp;    @ExceptionHandler({DataIntegrityViolationException.class})
-&nbsp;    public ResponseEntity&lt;String&gt; conflict(Exception ex , HttpServletRequest request) {
-<b class="fc">&nbsp;        logError(ex, &quot;Data integrity violation&quot;);</b>
-<b class="fc">&nbsp;        return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getLocalizedMessage());</b>
-&nbsp;    }
-&nbsp;
-&nbsp;    @ExceptionHandler({MethodArgumentNotValidException.class, DateTimeParseException.class,
-&nbsp;            InvalidFormatException.class})
-&nbsp;    public ResponseEntity&lt;String&gt; invalidAtribute(Exception ex, HttpServletRequest request) {
-<b class="fc">&nbsp;        String isolatedErrorMessage = getConstraintDefaultMessage(ex);</b>
-<b class="fc">&nbsp;        logError(ex, &quot;Unprocessable entity&quot;);</b>
-<b class="fc">&nbsp;        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(isolatedErrorMessage);</b>
-&nbsp;    }
-&nbsp;
-&nbsp;    @ExceptionHandler(Exception.class)
-&nbsp;    public ResponseEntity&lt;String&gt; handleGeneralException(Exception ex) {
-<b class="fc">&nbsp;        String message = &quot;An unexpected error occurred: &quot;;</b>
-<b class="fc">&nbsp;        logError(ex, message);</b>
-<b class="fc">&nbsp;        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)</b>
-<b class="fc">&nbsp;                .body(message + ex.getLocalizedMessage());</b>
-&nbsp;    }
-&nbsp;
-&nbsp;    String getConstraintDefaultMessage(Exception ex) {
-<b class="fc">&nbsp;        String errorMessage = ex.getLocalizedMessage();</b>
-<b class="fc">&nbsp;        String startTag = &quot;]]; default message [&quot;;</b>
-<b class="fc">&nbsp;        String endTag = &quot;]&quot;;</b>
-<b class="fc">&nbsp;        int startIndex = errorMessage.indexOf(startTag) + startTag.length();</b>
-<b class="fc">&nbsp;        int endIndex = errorMessage.indexOf(endTag, startIndex);</b>
-<b class="fc">&nbsp;        return errorMessage.substring(startIndex, endIndex);</b>
-&nbsp;    }
-&nbsp;
-&nbsp;    private static void logError(Exception ex, String message) {
-<b class="fc">&nbsp;        logger.error(&quot;{}: {}&quot;, message, ex.getMessage());</b>
-&nbsp;    }
-&nbsp;
 &nbsp;}
-&nbsp;
 </code>
 </pre>
 </div>
@@ -180,7 +128,7 @@ Current scope:     <a href="../../index.html">all classes</a>
 
 <div class="footer">
     
-    <div style="float:right;">generated on 2024-11-21 00:52</div>
+    <div style="float:right;">generated on 2024-11-24 22:28</div>
 </div>
 </body>
 </html>
