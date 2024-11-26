@@ -104,6 +104,41 @@ class OperationServiceImplTest {
     }
 
     @Test
+    void testExecuteOperation_Addition_Value2Missing() {
+        BadRequestException exception = assertThrows(BadRequestException.class,
+                () -> operationService.executeOperation(OperationType.ADDITION, new BigDecimal("5.0"), null));
+        assertEquals("The second value (value2) is required for operation: ADDITION", exception.getMessage());
+    }
+
+    @Test
+    void testExecuteOperation_Subtraction_Value2Missing() {
+        BadRequestException exception = assertThrows(BadRequestException.class,
+                () -> operationService.executeOperation(OperationType.SUBTRACTION, new BigDecimal("5.0"), null));
+        assertEquals("The second value (value2) is required for operation: SUBTRACTION", exception.getMessage());
+    }
+
+    @Test
+    void testExecuteOperation_Multiplication_Value2Missing() {
+        BadRequestException exception = assertThrows(BadRequestException.class,
+                () -> operationService.executeOperation(OperationType.MULTIPLICATION, new BigDecimal("5.0"), null));
+        assertEquals("The second value (value2) is required for operation: MULTIPLICATION", exception.getMessage());
+    }
+
+    @Test
+    void testExecuteOperation_Division_Value2Missing() {
+        BadRequestException exception = assertThrows(BadRequestException.class,
+                () -> operationService.executeOperation(OperationType.DIVISION, new BigDecimal("5.0"), null));
+        assertEquals("The second value (value2) is required for operation: DIVISION", exception.getMessage());
+    }
+
+    @Test
+    void testExecuteOperation_Value1Missing() {
+        BadRequestException exception = assertThrows(BadRequestException.class,
+                () -> operationService.executeOperation(OperationType.ADDITION, null, new BigDecimal("5.0")));
+        assertEquals("The first value (value1) is required for operation: ADDITION", exception.getMessage());
+    }
+
+    @Test
     void testExecuteOperation_Addition() {
         String result = operationService.executeOperation(OperationType.ADDITION, new BigDecimal("5.0"), new BigDecimal("5.0"));
         assertEquals("10", result);

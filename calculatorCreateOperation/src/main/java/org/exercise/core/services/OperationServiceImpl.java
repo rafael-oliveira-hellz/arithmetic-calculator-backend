@@ -40,7 +40,6 @@ public class OperationServiceImpl implements OperationService {
 
     @Transactional
     public Record doOperation(String token, String type, String value1Str, String value2Str) {
-        try {
             logger.info("Retrieving user ID from access token");
             UUID userId = getUserIdFromToken(token);
 
@@ -55,22 +54,6 @@ public class OperationServiceImpl implements OperationService {
             String result = executeOperation(operation.getType(), value1, value2);
 
             return saveRecord(operation, updatedUser, result);
-        } catch (UnsupportedOperationException e) {
-            logger.error("Operation not supported: {}", e.getMessage(), e);
-            throw e;
-        } catch (BadRequestException e) {
-            logger.warn("Bad request: {}", e.getMessage(), e);
-            throw e;
-        } catch (PaymentRequiredException e) {
-            logger.error("Payment required: {}", e.getMessage(), e);
-            throw e;
-        } catch (NotFoundException e) {
-            logger.warn("Resource not found: {}", e.getMessage(), e);
-            throw e;
-        } catch (Exception e) {
-            logger.error("Unexpected error occurred: {}", e.getMessage(), e);
-            throw new RuntimeException("An unexpected error occurred. Please try again later.");
-        }
     }
 
     private BigDecimal parseBigDecimal(String valueStr, String valueName) {
@@ -149,6 +132,8 @@ public class OperationServiceImpl implements OperationService {
 
     String executeOperation(OperationType type, BigDecimal value1, BigDecimal value2) {
         try {
+            validateOperationValues(type, value1, value2);
+
             switch (type) {
                 case ADDITION:
                     return formatBigDecimal(value1.add(value2));
@@ -169,6 +154,21 @@ public class OperationServiceImpl implements OperationService {
             logger.error("Error executing operation: {}", e.getMessage(), e);
             throw e;
         }
+    }
+
+    private void validateOperationValues(OperationType type, BigDecimal value1, BigDecimal value2) {
+        if (value1 == null) {
+            throw new BadRequestException("The first value (value1) is required for operation: " + type);
+        }
+
+        if (requiresSecondValue(type) && value2 == null) {
+            throw new BadRequestException("The second value (value2) is required for operation: " + type);
+        }
+    }
+
+    private boolean requiresSecondValue(OperationType type) {
+        return type == OperationType.ADDITION || type == OperationType.SUBTRACTION
+                || type == OperationType.MULTIPLICATION || type == OperationType.DIVISION;
     }
 
     private String division(BigDecimal value1, BigDecimal value2) {
