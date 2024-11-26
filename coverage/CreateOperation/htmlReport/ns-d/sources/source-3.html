@@ -5,7 +5,7 @@
 <html id="htmlId">
 <head>
   <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
-  <title>Coverage Report > OperationRepository</title>
+  <title>Coverage Report > UserRepository</title>
   <style type="text/css">
     @import "../../css/coverage.css";
     @import "../../css/idea.min.css";
@@ -22,7 +22,7 @@ Current scope:     <a href="../../index.html">all classes</a>
     <a href="../index.html">org.exercise.infrastructure.persistence</a>
 </div>
 
-<h1>Coverage Summary for Class: OperationRepository (org.exercise.infrastructure.persistence)</h1>
+<h1>Coverage Summary for Class: UserRepository (org.exercise.infrastructure.persistence)</h1>
 
 <table class="coverageStats">
 
@@ -30,13 +30,13 @@ Current scope:     <a href="../../index.html">all classes</a>
   <th class="name">Class</th>
 </tr>
   <tr>
-    <td class="name">OperationRepository$MockitoMock$AoEne54f</td>
+    <td class="name">UserRepository$MockitoMock$r8Yz3Kof</td>
   </tr>
   <tr>
-    <td class="name">OperationRepository$MockitoMock$AoEne54f$auxiliary$Aj4pxhpk</td>
+    <td class="name">UserRepository$MockitoMock$r8Yz3Kof$auxiliary$hBbd0E3b</td>
   </tr>
   <tr>
-    <td class="name">OperationRepository$MockitoMock$AoEne54f$auxiliary$lQuqQhZt</td>
+    <td class="name">UserRepository$MockitoMock$r8Yz3Kof$auxiliary$SKUjn9Ym</td>
   </tr>
 <tr>
   <td class="name"><strong>Total</strong></td>
@@ -50,18 +50,14 @@ Current scope:     <a href="../../index.html">all classes</a>
 <pre>
 <code class="sourceCode" id="sourceCode">&nbsp;package org.exercise.infrastructure.persistence;
 &nbsp;
-&nbsp;import org.exercise.core.entities.Operation;
-&nbsp;import org.exercise.core.enums.OperationType;
+&nbsp;import org.exercise.core.entities.User;
 &nbsp;import org.springframework.data.jpa.repository.JpaRepository;
 &nbsp;import org.springframework.stereotype.Repository;
 &nbsp;
-&nbsp;import java.util.Optional;
 &nbsp;import java.util.UUID;
 &nbsp;
 &nbsp;@Repository
-&nbsp;public interface OperationRepository extends JpaRepository&lt;Operation, UUID&gt; {
-&nbsp;
-&nbsp;    Optional&lt;Operation&gt; findByType(OperationType type);
+&nbsp;public interface UserRepository extends JpaRepository&lt;User, UUID&gt; {
 &nbsp;}
 </code>
 </pre>
@@ -86,7 +82,7 @@ Current scope:     <a href="../../index.html">all classes</a>
 
 <div class="footer">
     
-    <div style="float:right;">generated on 2024-11-26 14:12</div>
+    <div style="float:right;">generated on 2024-11-26 15:34</div>
 </div>
 </body>
 </html>

@@ -40,23 +40,27 @@ public class OperationServiceImpl implements OperationService {
 
     @Transactional
     public Record doOperation(String token, String type, String value1Str, String value2Str) {
-            logger.info("Retrieving user ID from access token");
-            UUID userId = getUserIdFromToken(token);
+        logger.info("Retrieving user ID from access token");
+        UUID userId = getUserIdFromToken(token);
 
-            User user = findUserById(userId);
+        User user = findUserById(userId);
 
-            BigDecimal value1 = value1Str != null ? parseBigDecimal(value1Str, "value1") : null;
-            BigDecimal value2 = value2Str != null ? parseBigDecimal(value2Str, "value2") : null;
+        OperationType operationType = OperationType.valueOf(type.toUpperCase());
 
-            Operation operation = getOperation(type, value1, value2);
+        logger.info("Validating operation values");
+        BigDecimal[] values = validateOperationValues(operationType, value1Str, value2Str);
+        BigDecimal value1 = values[0];
+        BigDecimal value2 = values[1];
 
-            User updatedUser = checkBalance(user, operation.getCost());
-            String result = executeOperation(operation.getType(), value1, value2);
+        Operation operation = getOperation(type, value1, value2);
 
-            return saveRecord(operation, updatedUser, result);
+        User updatedUser = checkBalance(user, operation.getCost());
+        String result = executeOperation(operation.getType(), value1, value2);
+
+        return saveRecord(operation, updatedUser, result);
     }
 
-    private BigDecimal parseBigDecimal(String valueStr, String valueName) {
+    BigDecimal parseBigDecimal(String valueStr, String valueName) {
         try {
             return new BigDecimal(valueStr);
         } catch (NumberFormatException e) {
@@ -64,7 +68,7 @@ public class OperationServiceImpl implements OperationService {
         }
     }
 
-    private UUID getUserIdFromToken(String accessToken) {
+    UUID getUserIdFromToken(String accessToken) {
         try {
             SignedJWT signedJWT = SignedJWT.parse(accessToken);
             return Optional.ofNullable(signedJWT.getJWTClaimsSet().getStringClaim("sub"))
@@ -84,7 +88,7 @@ public class OperationServiceImpl implements OperationService {
         }
     }
 
-    private User findUserById(UUID userId) {
+    User findUserById(UUID userId) {
         return userRepository.findById(userId).orElseThrow(() -> {
             logger.warn("User not found with ID: {}", userId);
             return new NotFoundException("User not found. Try logging in again");
@@ -101,20 +105,26 @@ public class OperationServiceImpl implements OperationService {
                         logger.warn("Operation type not found: {}", operationType);
                         return new NotFoundException("Operation type not found");
                     });
-        } catch (IllegalArgumentException e) {
+        } catch (UnsupportedOperationException e) {
             throw new BadRequestException("Invalid operation type: " + type, e.getMessage());
         }
     }
 
-    private void checkValues(BigDecimal value1, BigDecimal value2, OperationType operationType) {
-        boolean needTwoValues = operationType.getId() >= 1 && operationType.getId() < 4;
+    void checkValues(BigDecimal value1, BigDecimal value2, OperationType operationType) {
+        boolean needTwoValues = operationType == OperationType.ADDITION ||
+                operationType == OperationType.SUBTRACTION ||
+                operationType == OperationType.MULTIPLICATION ||
+                operationType == OperationType.DIVISION;
 
         if (value1 == null) {
             throw new BadRequestException("The first value is required for operation: " + operationType);
         }
+
         if (needTwoValues && value2 == null) {
             throw new BadRequestException("The second value is required for operation: " + operationType);
         }
+
+        logger.debug("Checked values successfully: value1={}, value2={}, operationType={}", value1, value2, operationType);
     }
 
     User checkBalance(User user, Integer cost) {
@@ -131,6 +141,10 @@ public class OperationServiceImpl implements OperationService {
     }
 
     String executeOperation(OperationType type, BigDecimal value1, BigDecimal value2) {
+        if (type == null) {
+            throw new UnsupportedOperationException("Unsupported operation type: null");
+        }
+
         try {
             switch (type) {
                 case ADDITION:
@@ -154,14 +168,27 @@ public class OperationServiceImpl implements OperationService {
         }
     }
 
-    private void validateOperationValues(OperationType type, BigDecimal value1, BigDecimal value2) {
-        if (value1 == null) {
+    BigDecimal[] validateOperationValues(OperationType type, String value1Str, String value2Str) {
+        if (value1Str == null) {
             throw new BadRequestException("The first value (value1) is required for operation: " + type);
         }
 
-        if (requiresSecondValue(type) && value2 == null) {
+        BigDecimal value1 = parseBigDecimal(value1Str, "value1");
+        BigDecimal value2 = null;
+
+        if (!requiresSecondValue(type)) {
+            if (value2Str != null) {
+                throw new BadRequestException("Invalid payload: value2 is not allowed for operation: " + type);
+            }
+        } else if (value2Str == null) {
             throw new BadRequestException("The second value (value2) is required for operation: " + type);
+        } else {
+            value2 = parseBigDecimal(value2Str, "value2");
         }
+
+        System.out.println("value1: " + value1 + ", value2: " + value2);
+
+        return new BigDecimal[]{value1, value2};
     }
 
     private boolean requiresSecondValue(OperationType type) {
@@ -197,7 +224,7 @@ public class OperationServiceImpl implements OperationService {
         return x1;
     }
 
-    private static String formatBigDecimal(BigDecimal result) {
+    static String formatBigDecimal(BigDecimal result) {
         if (result.scale() <= 0 || result.stripTrailingZeros().scale() <= 0) {
             return result.setScale(0, RoundingMode.HALF_UP).toPlainString();
         } else {

@@ -19,4 +19,5 @@ public enum OperationType {
         this.name = name;
         this.id = i;
     }
+
 }

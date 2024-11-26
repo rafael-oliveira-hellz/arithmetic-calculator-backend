@@ -1,12 +1,14 @@
 package org.exercise.lambda;
 
 
+import com.amazonaws.serverless.exceptions.ContainerInitializationException;
 import com.amazonaws.serverless.proxy.internal.LambdaContainerHandler;
 import com.amazonaws.serverless.proxy.internal.testutils.AwsProxyRequestBuilder;
 import com.amazonaws.serverless.proxy.internal.testutils.MockLambdaContext;
 import com.amazonaws.serverless.proxy.model.AwsProxyResponse;
 import com.amazonaws.services.lambda.runtime.Context;
 import jakarta.ws.rs.HttpMethod;
+import jakarta.ws.rs.core.Application;
 import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
@@ -16,12 +18,16 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
+import software.amazon.awssdk.services.cognitoidentityprovider.model.InternalErrorException;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
 
 @TestInstance(TestInstance.Lifecycle.PER_METHOD)
 @SpringBootTest
@@ -50,6 +56,12 @@ public class StreamLambdaHandlerTest {
         AwsProxyResponse response = readResponse(responseStream);
         assertNotNull(response);
         assertEquals(Response.Status.NOT_FOUND.getStatusCode(), response.getStatusCode());
+    }
+
+    @Test
+    void testStreamLambdaHandler_InitializationSuccess() {
+        StreamLambdaHandler handler = new StreamLambdaHandler();
+        assertNotNull(handler);
     }
 
     private void handle(InputStream is, ByteArrayOutputStream os) {

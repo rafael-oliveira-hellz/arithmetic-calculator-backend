@@ -41,18 +41,18 @@ Current scope:     <a href="../../index.html">all classes</a>
   <td class="name">OperationServiceImpl</td>
 <td class="coverageStat">
   <span class="percent">
-    90%
+    100%
   </span>
   <span class="absValue">
-    (18/20)
+    (20/20)
   </span>
 </td>
 <td class="coverageStat">
   <span class="percent">
-    75%
+    94,8%
   </span>
   <span class="absValue">
-    (63/84)
+    (91/96)
   </span>
 </td>
 </tr>
@@ -82,18 +82,18 @@ Current scope:     <a href="../../index.html">all classes</a>
   <td class="name"><strong>Total</strong></td>
 <td class="coverageStat">
   <span class="percent">
-    90,5%
+    100%
   </span>
   <span class="absValue">
-    (19/21)
+    (21/21)
   </span>
 </td>
 <td class="coverageStat">
   <span class="percent">
-    75,3%
+    94,8%
   </span>
   <span class="absValue">
-    (64/85)
+    (92/97)
   </span>
 </td>
 </tr>
@@ -151,10 +151,14 @@ Current scope:     <a href="../../index.html">all classes</a>
 &nbsp;
 <b class="fc">&nbsp;            User user = findUserById(userId);</b>
 &nbsp;
-<b class="fc">&nbsp;            BigDecimal value1 = value1Str != null ? parseBigDecimal(value1Str, &quot;value1&quot;) : null;</b>
-<b class="fc">&nbsp;            BigDecimal value2 = value2Str != null ? parseBigDecimal(value2Str, &quot;value2&quot;) : null;</b>
+<b class="fc">&nbsp;            OperationType operationType = OperationType.valueOf(type.toUpperCase());</b>
 &nbsp;
-<b class="fc">&nbsp;            Operation operation = getOperation(type, value1, value2);</b>
+<b class="fc">&nbsp;            logger.info(&quot;Validating operation values&quot;);</b>
+<b class="fc">&nbsp;            BigDecimal[] values = validateOperationValues(operationType, value1Str, value2Str);</b>
+<b class="fc">&nbsp;            BigDecimal value1 = values[0];</b>
+<b class="fc">&nbsp;            BigDecimal value2 = values[1];</b>
+&nbsp;
+<b class="fc">&nbsp;        Operation operation = getOperation(type, value1, value2);</b>
 &nbsp;
 <b class="fc">&nbsp;            User updatedUser = checkBalance(user, operation.getCost());</b>
 <b class="fc">&nbsp;            String result = executeOperation(operation.getType(), value1, value2);</b>
@@ -162,23 +166,23 @@ Current scope:     <a href="../../index.html">all classes</a>
 <b class="fc">&nbsp;            return saveRecord(operation, updatedUser, result);</b>
 &nbsp;    }
 &nbsp;
-&nbsp;    private BigDecimal parseBigDecimal(String valueStr, String valueName) {
+&nbsp;    BigDecimal parseBigDecimal(String valueStr, String valueName) {
 &nbsp;        try {
 <b class="fc">&nbsp;            return new BigDecimal(valueStr);</b>
-<b class="nc">&nbsp;        } catch (NumberFormatException e) {</b>
-<b class="nc">&nbsp;            throw new BadRequestException(&quot;Invalid format for &quot; + valueName + &quot;: &quot; + valueStr);</b>
+<b class="fc">&nbsp;        } catch (NumberFormatException e) {</b>
+<b class="fc">&nbsp;            throw new BadRequestException(&quot;Invalid format for &quot; + valueName + &quot;: &quot; + valueStr);</b>
 &nbsp;        }
 &nbsp;    }
 &nbsp;
-&nbsp;    private UUID getUserIdFromToken(String accessToken) {
+&nbsp;    UUID getUserIdFromToken(String accessToken) {
 &nbsp;        try {
 <b class="fc">&nbsp;            SignedJWT signedJWT = SignedJWT.parse(accessToken);</b>
 <b class="fc">&nbsp;            return Optional.ofNullable(signedJWT.getJWTClaimsSet().getStringClaim(&quot;sub&quot;))</b>
 <b class="fc">&nbsp;                    .map(sub -&gt; {</b>
 &nbsp;                        try {
 <b class="fc">&nbsp;                            return UUID.fromString(sub);</b>
-<b class="nc">&nbsp;                        } catch (IllegalArgumentException e) {</b>
-<b class="nc">&nbsp;                            throw new BadRequestException(</b>
+<b class="fc">&nbsp;                        } catch (IllegalArgumentException e) {</b>
+<b class="fc">&nbsp;                            throw new BadRequestException(</b>
 &nbsp;                                    &quot;Token contains invalid user ID format&quot;,
 &nbsp;                                    &quot;Invalid UUID format: &quot; + sub
 &nbsp;                            );
@@ -190,7 +194,7 @@ Current scope:     <a href="../../index.html">all classes</a>
 &nbsp;        }
 &nbsp;    }
 &nbsp;
-&nbsp;    private User findUserById(UUID userId) {
+&nbsp;    User findUserById(UUID userId) {
 <b class="fc">&nbsp;        return userRepository.findById(userId).orElseThrow(() -&gt; {</b>
 <b class="fc">&nbsp;            logger.warn(&quot;User not found with ID: {}&quot;, userId);</b>
 <b class="fc">&nbsp;            return new NotFoundException(&quot;User not found. Try logging in again&quot;);</b>
@@ -204,23 +208,29 @@ Current scope:     <a href="../../index.html">all classes</a>
 &nbsp;
 <b class="fc">&nbsp;            return operationRepository.findByType(operationType)</b>
 <b class="fc">&nbsp;                    .orElseThrow(() -&gt; {</b>
-<b class="nc">&nbsp;                        logger.warn(&quot;Operation type not found: {}&quot;, operationType);</b>
-<b class="nc">&nbsp;                        return new NotFoundException(&quot;Operation type not found&quot;);</b>
+<b class="fc">&nbsp;                        logger.warn(&quot;Operation type not found: {}&quot;, operationType);</b>
+<b class="fc">&nbsp;                        return new NotFoundException(&quot;Operation type not found&quot;);</b>
 &nbsp;                    });
-<b class="fc">&nbsp;        } catch (IllegalArgumentException e) {</b>
-<b class="fc">&nbsp;            throw new BadRequestException(&quot;Invalid operation type: &quot; + type, e.getMessage());</b>
+<b class="nc">&nbsp;        } catch (UnsupportedOperationException e) {</b>
+<b class="nc">&nbsp;            throw new BadRequestException(&quot;Invalid operation type: &quot; + type, e.getMessage());</b>
 &nbsp;        }
 &nbsp;    }
 &nbsp;
-&nbsp;    private void checkValues(BigDecimal value1, BigDecimal value2, OperationType operationType) {
-<b class="fc">&nbsp;        boolean needTwoValues = operationType.getId() &gt;= 1 &amp;&amp; operationType.getId() &lt; 4;</b>
+&nbsp;    void checkValues(BigDecimal value1, BigDecimal value2, OperationType operationType) {
+<b class="fc">&nbsp;        boolean needTwoValues = operationType == OperationType.ADDITION ||</b>
+&nbsp;                operationType == OperationType.SUBTRACTION ||
+&nbsp;                operationType == OperationType.MULTIPLICATION ||
+&nbsp;                operationType == OperationType.DIVISION;
 &nbsp;
 <b class="fc">&nbsp;        if (value1 == null) {</b>
 <b class="nc">&nbsp;            throw new BadRequestException(&quot;The first value is required for operation: &quot; + operationType);</b>
 &nbsp;        }
+&nbsp;
 <b class="fc">&nbsp;        if (needTwoValues &amp;&amp; value2 == null) {</b>
 <b class="nc">&nbsp;            throw new BadRequestException(&quot;The second value is required for operation: &quot; + operationType);</b>
 &nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        logger.debug(&quot;Checked values successfully: value1={}, value2={}, operationType={}&quot;, value1, value2, operationType);</b>
 &nbsp;    }
 &nbsp;
 &nbsp;    User checkBalance(User user, Integer cost) {
@@ -237,9 +247,11 @@ Current scope:     <a href="../../index.html">all classes</a>
 &nbsp;    }
 &nbsp;
 &nbsp;    String executeOperation(OperationType type, BigDecimal value1, BigDecimal value2) {
-&nbsp;        try {
-<b class="fc">&nbsp;            validateOperationValues(type, value1, value2);</b>
+<b class="fc">&nbsp;        if (type == null) {</b>
+<b class="fc">&nbsp;            throw new UnsupportedOperationException(&quot;Unsupported operation type: null&quot;);</b>
+&nbsp;        }
 &nbsp;
+&nbsp;        try {
 <b class="fc">&nbsp;            switch (type) {</b>
 &nbsp;                case ADDITION:
 <b class="fc">&nbsp;                    return formatBigDecimal(value1.add(value2));</b>
@@ -262,14 +274,26 @@ Current scope:     <a href="../../index.html">all classes</a>
 &nbsp;        }
 &nbsp;    }
 &nbsp;
-&nbsp;    private void validateOperationValues(OperationType type, BigDecimal value1, BigDecimal value2) {
-<b class="fc">&nbsp;        if (value1 == null) {</b>
+&nbsp;    BigDecimal[] validateOperationValues(OperationType type, String value1Str, String value2Str) {
+<b class="fc">&nbsp;        if (value1Str == null) {</b>
 <b class="fc">&nbsp;            throw new BadRequestException(&quot;The first value (value1) is required for operation: &quot; + type);</b>
 &nbsp;        }
 &nbsp;
-<b class="fc">&nbsp;        if (requiresSecondValue(type) &amp;&amp; value2 == null) {</b>
+<b class="fc">&nbsp;        BigDecimal value1 = parseBigDecimal(value1Str, &quot;value1&quot;);</b>
+<b class="fc">&nbsp;        BigDecimal value2 = null;</b>
+&nbsp;
+<b class="fc">&nbsp;        if (!requiresSecondValue(type)) {</b>
+<b class="fc">&nbsp;            if (value2Str != null) {</b>
+<b class="fc">&nbsp;                throw new BadRequestException(&quot;Invalid payload: value2 is not allowed for operation: &quot; + type);</b>
+&nbsp;            }
+<b class="fc">&nbsp;        } else if (value2Str == null) {</b>
 <b class="fc">&nbsp;            throw new BadRequestException(&quot;The second value (value2) is required for operation: &quot; + type);</b>
+&nbsp;        } else {
+<b class="fc">&nbsp;            value2 = parseBigDecimal(value2Str, &quot;value2&quot;);</b>
 &nbsp;        }
+&nbsp;
+&nbsp;
+<b class="fc">&nbsp;        return new BigDecimal[]{value1, value2};</b>
 &nbsp;    }
 &nbsp;
 &nbsp;    private boolean requiresSecondValue(OperationType type) {
@@ -281,31 +305,31 @@ Current scope:     <a href="../../index.html">all classes</a>
 <b class="fc">&nbsp;        if (value2.compareTo(BigDecimal.ZERO) == 0) {</b>
 <b class="fc">&nbsp;            throw new UnsupportedOperationException(&quot;Division by 0 is not possible&quot;);</b>
 &nbsp;        }
-<b class="nc">&nbsp;        BigDecimal result = value1.divide(value2, 15, RoundingMode.HALF_UP);</b>
-<b class="nc">&nbsp;        return formatBigDecimal(result);</b>
+<b class="fc">&nbsp;        BigDecimal result = value1.divide(value2, 15, RoundingMode.HALF_UP);</b>
+<b class="fc">&nbsp;        return formatBigDecimal(result);</b>
 &nbsp;    }
 &nbsp;
 &nbsp;    private String squareRoot(BigDecimal value) {
 <b class="fc">&nbsp;        if (value.compareTo(BigDecimal.ZERO) &lt; 0) {</b>
 <b class="fc">&nbsp;            throw new UnsupportedOperationException(&quot;Negative numbers don&#39;t have square roots&quot;);</b>
 &nbsp;        }
-<b class="nc">&nbsp;        BigDecimal result = sqrt(value, new MathContext(15));</b>
-<b class="nc">&nbsp;        return formatBigDecimal(result);</b>
+<b class="fc">&nbsp;        BigDecimal result = sqrt(value, new MathContext(15));</b>
+<b class="fc">&nbsp;        return formatBigDecimal(result);</b>
 &nbsp;    }
 &nbsp;
 &nbsp;    private BigDecimal sqrt(BigDecimal value, MathContext mc) {
-<b class="nc">&nbsp;        BigDecimal x0 = BigDecimal.ZERO;</b>
-<b class="nc">&nbsp;        BigDecimal x1 = new BigDecimal(Math.sqrt(value.doubleValue()));</b>
-<b class="nc">&nbsp;        while (!x0.equals(x1)) {</b>
-<b class="nc">&nbsp;            x0 = x1;</b>
-<b class="nc">&nbsp;            x1 = value.divide(x0, mc);</b>
-<b class="nc">&nbsp;            x1 = x1.add(x0);</b>
-<b class="nc">&nbsp;            x1 = x1.divide(BigDecimal.valueOf(2), mc);</b>
+<b class="fc">&nbsp;        BigDecimal x0 = BigDecimal.ZERO;</b>
+<b class="fc">&nbsp;        BigDecimal x1 = new BigDecimal(Math.sqrt(value.doubleValue()));</b>
+<b class="fc">&nbsp;        while (!x0.equals(x1)) {</b>
+<b class="fc">&nbsp;            x0 = x1;</b>
+<b class="fc">&nbsp;            x1 = value.divide(x0, mc);</b>
+<b class="fc">&nbsp;            x1 = x1.add(x0);</b>
+<b class="fc">&nbsp;            x1 = x1.divide(BigDecimal.valueOf(2), mc);</b>
 &nbsp;        }
-<b class="nc">&nbsp;        return x1;</b>
+<b class="fc">&nbsp;        return x1;</b>
 &nbsp;    }
 &nbsp;
-&nbsp;    private static String formatBigDecimal(BigDecimal result) {
+&nbsp;    static String formatBigDecimal(BigDecimal result) {
 <b class="fc">&nbsp;        if (result.scale() &lt;= 0 || result.stripTrailingZeros().scale() &lt;= 0) {</b>
 <b class="fc">&nbsp;            return result.setScale(0, RoundingMode.HALF_UP).toPlainString();</b>
 &nbsp;        } else {
@@ -343,7 +367,7 @@ Current scope:     <a href="../../index.html">all classes</a>
 
 <div class="footer">
     
-    <div style="float:right;">generated on 2024-11-26 14:12</div>
+    <div style="float:right;">generated on 2024-11-26 15:34</div>
 </div>
 </body>
 </html>
