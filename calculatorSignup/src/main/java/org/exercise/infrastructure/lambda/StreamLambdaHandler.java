@@ -40,5 +40,4 @@ public class StreamLambdaHandler implements RequestStreamHandler {
             throw e;
         }
     }
-
 }

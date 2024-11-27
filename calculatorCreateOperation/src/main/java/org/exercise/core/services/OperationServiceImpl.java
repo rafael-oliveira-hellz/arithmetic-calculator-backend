@@ -39,20 +39,19 @@ public class OperationServiceImpl implements OperationService {
     private final RandomStringClient client;
 
     @Transactional
-    public Record doOperation(String token, String type, String value1Str, String value2Str) {
+    public Record doOperation(String token, String type, BigDecimal value1, BigDecimal value2) {
         logger.info("Retrieving user ID from access token");
         UUID userId = getUserIdFromToken(token);
 
         User user = findUserById(userId);
-
-        OperationType operationType = OperationType.valueOf(type.toUpperCase());
+        OperationType operationType = getOperationType(type);
 
         logger.info("Validating operation values");
-        BigDecimal[] values = validateOperationValues(operationType, value1Str, value2Str);
-        BigDecimal value1 = values[0];
-        BigDecimal value2 = values[1];
+        validateOperationValues(operationType, value1, value2);
 
-        Operation operation = getOperation(type, value1, value2);
+        logger.info("Validated operation values: value1={}, value2={}, operationType={}", value1, value2, type);
+
+        Operation operation = getOperation(operationType, value1, value2);
 
         User updatedUser = checkBalance(user, operation.getCost());
         String result = executeOperation(operation.getType(), value1, value2);
@@ -60,11 +59,12 @@ public class OperationServiceImpl implements OperationService {
         return saveRecord(operation, updatedUser, result);
     }
 
-    BigDecimal parseBigDecimal(String valueStr, String valueName) {
+    static OperationType getOperationType(String type) {
         try {
-            return new BigDecimal(valueStr);
-        } catch (NumberFormatException e) {
-            throw new BadRequestException("Invalid format for " + valueName + ": " + valueStr);
+            return OperationType.valueOf(type.toUpperCase());
+        } catch (Exception e) {
+            throw new BadRequestException("Wrong operation type. Options are: addition, subtraction, multiplication, " +
+                    "division, square_root and random_string");
         }
     }
 
@@ -95,36 +95,12 @@ public class OperationServiceImpl implements OperationService {
         });
     }
 
-    public Operation getOperation(String type, BigDecimal value1, BigDecimal value2) {
-        try {
-            OperationType operationType = OperationType.valueOf(type.toUpperCase());
-            checkValues(value1, value2, operationType);
-
-            return operationRepository.findByType(operationType)
-                    .orElseThrow(() -> {
-                        logger.warn("Operation type not found: {}", operationType);
-                        return new NotFoundException("Operation type not found");
-                    });
-        } catch (UnsupportedOperationException e) {
-            throw new BadRequestException("Invalid operation type: " + type, e.getMessage());
-        }
-    }
-
-    void checkValues(BigDecimal value1, BigDecimal value2, OperationType operationType) {
-        boolean needTwoValues = operationType == OperationType.ADDITION ||
-                operationType == OperationType.SUBTRACTION ||
-                operationType == OperationType.MULTIPLICATION ||
-                operationType == OperationType.DIVISION;
-
-        if (value1 == null) {
-            throw new BadRequestException("The first value is required for operation: " + operationType);
-        }
-
-        if (needTwoValues && value2 == null) {
-            throw new BadRequestException("The second value is required for operation: " + operationType);
-        }
-
-        logger.debug("Checked values successfully: value1={}, value2={}, operationType={}", value1, value2, operationType);
+    public Operation getOperation(OperationType operationType, BigDecimal value1, BigDecimal value2) {
+        return operationRepository.findByType(operationType)
+                .orElseThrow(() -> {
+                    logger.warn("Operation type not found: {}", operationType);
+                    return new NotFoundException("Operation type not found");
+                });
     }
 
     User checkBalance(User user, Integer cost) {
@@ -145,54 +121,30 @@ public class OperationServiceImpl implements OperationService {
             throw new UnsupportedOperationException("Unsupported operation type: null");
         }
 
-        try {
-            switch (type) {
-                case ADDITION:
-                    return formatBigDecimal(value1.add(value2));
-                case SUBTRACTION:
-                    return formatBigDecimal(value1.subtract(value2));
-                case MULTIPLICATION:
-                    return formatBigDecimal(value1.multiply(value2));
-                case DIVISION:
-                    return division(value1, value2);
-                case SQUARE_ROOT:
-                    return squareRoot(value1);
-                case RANDOM_STRING:
-                    return client.fetchRandomString(value1.intValue());
-                default:
-                    throw new UnsupportedOperationException("Unsupported operation type: " + type);
-            }
-        } catch (UnsupportedOperationException | ArithmeticException e) {
-            logger.error("Error executing operation: {}", e.getMessage(), e);
-            throw e;
-        }
+        return switch (type) {
+            case ADDITION -> formatBigDecimal(value1.add(value2));
+            case SUBTRACTION -> formatBigDecimal(value1.subtract(value2));
+            case MULTIPLICATION -> formatBigDecimal(value1.multiply(value2));
+            case DIVISION -> division(value1, value2);
+            case SQUARE_ROOT -> squareRoot(value1);
+            case RANDOM_STRING -> client.fetchRandomString(value1.intValue());
+        };
     }
 
-    BigDecimal[] validateOperationValues(OperationType type, String value1Str, String value2Str) {
-        if (value1Str == null) {
+    void validateOperationValues(OperationType type, BigDecimal value1, BigDecimal value2) {
+        if (value1 == null) {
             throw new BadRequestException("The first value (value1) is required for operation: " + type);
         }
 
-        BigDecimal value1 = parseBigDecimal(value1Str, "value1");
-        BigDecimal value2 = null;
-
-        if (!requiresSecondValue(type)) {
-            if (value2Str != null) {
-                throw new BadRequestException("Invalid payload: value2 is not allowed for operation: " + type);
-            }
-        }
-        else {
-            if (value2Str == null) {
+        if (requiresSecondValue(type)) {
+            if (value2 == null) {
                 throw new BadRequestException("The second value (value2) is required for operation: " + type);
             }
-
-            value2 = parseBigDecimal(value2Str, "value2");
+        } else if (value2 != null) {
+            throw new BadRequestException("Invalid payload: value2 is not allowed for operation: " + type);
         }
-
-        logger.debug("Validated operation values: value1={}, value2={}, operationType={}", value1, value2, type);
-
-        return new BigDecimal[]{value1, value2};
     }
+
 
     private boolean requiresSecondValue(OperationType type) {
         return type == OperationType.ADDITION || type == OperationType.SUBTRACTION
@@ -217,7 +169,7 @@ public class OperationServiceImpl implements OperationService {
 
     private BigDecimal sqrt(BigDecimal value, MathContext mc) {
         BigDecimal x0 = BigDecimal.ZERO;
-        BigDecimal x1 = new BigDecimal(Math.sqrt(value.doubleValue()));
+        BigDecimal x1 = BigDecimal.valueOf(Math.sqrt(value.doubleValue()));
         while (!x0.equals(x1)) {
             x0 = x1;
             x1 = value.divide(x0, mc);

@@ -1,4 +1,6 @@
 package org.exercise.core.dtos;
 
-public record Values(Double value1, Double value2) {
+import java.math.BigDecimal;
+
+public record Values(BigDecimal value1, BigDecimal value2) {
 }

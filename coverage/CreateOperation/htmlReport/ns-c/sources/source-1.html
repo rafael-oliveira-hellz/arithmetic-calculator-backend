@@ -30,13 +30,13 @@ Current scope:     <a href="../../index.html">all classes</a>
   <th class="name">Class</th>
 </tr>
   <tr>
-    <td class="name">OperationService$MockitoMock$eM671QAk</td>
+    <td class="name">OperationService$MockitoMock$8MvIpms6</td>
   </tr>
   <tr>
-    <td class="name">OperationService$MockitoMock$eM671QAk$auxiliary$aIfB5x1z</td>
+    <td class="name">OperationService$MockitoMock$8MvIpms6$auxiliary$QHOR5CsP</td>
   </tr>
   <tr>
-    <td class="name">OperationService$MockitoMock$eM671QAk$auxiliary$ZDLHrQeN</td>
+    <td class="name">OperationService$MockitoMock$8MvIpms6$auxiliary$w0glPHNZ</td>
   </tr>
 <tr>
   <td class="name"><strong>Total</strong></td>
@@ -52,6 +52,7 @@ Current scope:     <a href="../../index.html">all classes</a>
 &nbsp;
 &nbsp;import org.exercise.core.entities.Operation;
 &nbsp;import org.exercise.core.entities.Record;
+&nbsp;import org.exercise.core.enums.OperationType;
 &nbsp;import org.springframework.stereotype.Service;
 &nbsp;import org.springframework.transaction.annotation.Transactional;
 &nbsp;
@@ -60,8 +61,9 @@ Current scope:     <a href="../../index.html">all classes</a>
 &nbsp;@Service
 &nbsp;public interface OperationService {
 &nbsp;
-&nbsp;    Record doOperation(String token, String type, String value1Str, String value2Str);
-&nbsp;    Operation getOperation(String type, BigDecimal value1, BigDecimal value2);
+&nbsp;    @Transactional
+&nbsp;    Record doOperation(String token, String type, BigDecimal value1, BigDecimal value2);
+&nbsp;    Operation getOperation(OperationType operationType, BigDecimal value1, BigDecimal value2);
 &nbsp;}
 </code>
 </pre>
@@ -86,7 +88,7 @@ Current scope:     <a href="../../index.html">all classes</a>
 
 <div class="footer">
     
-    <div style="float:right;">generated on 2024-11-26 15:34</div>
+    <div style="float:right;">generated on 2024-11-26 21:35</div>
 </div>
 </body>
 </html>

@@ -34,6 +34,10 @@ Current scope:     <a href="../../index.html">all classes</a>
 </th>
 <th class="coverageStat 
 ">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
   Line, %
 </th>
 </tr>
@@ -44,15 +48,23 @@ Current scope:     <a href="../../index.html">all classes</a>
     100%
   </span>
   <span class="absValue">
-    (20/20)
+    (19/19)
   </span>
 </td>
 <td class="coverageStat">
   <span class="percent">
-    94,8%
+    97,2%
   </span>
   <span class="absValue">
-    (91/96)
+    (35/36)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (77/77)
   </span>
 </td>
 </tr>
@@ -85,15 +97,23 @@ Current scope:     <a href="../../index.html">all classes</a>
     100%
   </span>
   <span class="absValue">
-    (21/21)
+    (20/20)
   </span>
 </td>
 <td class="coverageStat">
   <span class="percent">
-    94,8%
+    97,2%
   </span>
   <span class="absValue">
-    (92/97)
+    (35/36)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (78/78)
   </span>
 </td>
 </tr>
@@ -145,32 +165,32 @@ Current scope:     <a href="../../index.html">all classes</a>
 &nbsp;    private final RandomStringClient client;
 &nbsp;
 &nbsp;    @Transactional
-&nbsp;    public Record doOperation(String token, String type, String value1Str, String value2Str) {
-<b class="fc">&nbsp;            logger.info(&quot;Retrieving user ID from access token&quot;);</b>
-<b class="fc">&nbsp;            UUID userId = getUserIdFromToken(token);</b>
+&nbsp;    public Record doOperation(String token, String type, BigDecimal value1, BigDecimal value2) {
+<b class="fc">&nbsp;        logger.info(&quot;Retrieving user ID from access token&quot;);</b>
+<b class="fc">&nbsp;        UUID userId = getUserIdFromToken(token);</b>
 &nbsp;
-<b class="fc">&nbsp;            User user = findUserById(userId);</b>
+<b class="fc">&nbsp;        User user = findUserById(userId);</b>
+<b class="fc">&nbsp;        OperationType operationType = getOperationType(type);</b>
 &nbsp;
-<b class="fc">&nbsp;            OperationType operationType = OperationType.valueOf(type.toUpperCase());</b>
+<b class="fc">&nbsp;        logger.info(&quot;Validating operation values&quot;);</b>
+<b class="fc">&nbsp;        validateOperationValues(operationType, value1, value2);</b>
 &nbsp;
-<b class="fc">&nbsp;            logger.info(&quot;Validating operation values&quot;);</b>
-<b class="fc">&nbsp;            BigDecimal[] values = validateOperationValues(operationType, value1Str, value2Str);</b>
-<b class="fc">&nbsp;            BigDecimal value1 = values[0];</b>
-<b class="fc">&nbsp;            BigDecimal value2 = values[1];</b>
+<b class="fc">&nbsp;        logger.info(&quot;Validated operation values: value1={}, value2={}, operationType={}&quot;, value1, value2, type);</b>
 &nbsp;
-<b class="fc">&nbsp;        Operation operation = getOperation(type, value1, value2);</b>
+<b class="fc">&nbsp;        Operation operation = getOperation(operationType, value1, value2);</b>
 &nbsp;
-<b class="fc">&nbsp;            User updatedUser = checkBalance(user, operation.getCost());</b>
-<b class="fc">&nbsp;            String result = executeOperation(operation.getType(), value1, value2);</b>
+<b class="fc">&nbsp;        User updatedUser = checkBalance(user, operation.getCost());</b>
+<b class="fc">&nbsp;        String result = executeOperation(operation.getType(), value1, value2);</b>
 &nbsp;
-<b class="fc">&nbsp;            return saveRecord(operation, updatedUser, result);</b>
+<b class="fc">&nbsp;        return saveRecord(operation, updatedUser, result);</b>
 &nbsp;    }
 &nbsp;
-&nbsp;    BigDecimal parseBigDecimal(String valueStr, String valueName) {
+&nbsp;    static OperationType getOperationType(String type) {
 &nbsp;        try {
-<b class="fc">&nbsp;            return new BigDecimal(valueStr);</b>
-<b class="fc">&nbsp;        } catch (NumberFormatException e) {</b>
-<b class="fc">&nbsp;            throw new BadRequestException(&quot;Invalid format for &quot; + valueName + &quot;: &quot; + valueStr);</b>
+<b class="fc">&nbsp;            return OperationType.valueOf(type.toUpperCase());</b>
+<b class="fc">&nbsp;        } catch (Exception e) {</b>
+<b class="fc">&nbsp;            throw new BadRequestException(&quot;Wrong operation type. Options are: addition, subtraction, multiplication, &quot; +</b>
+&nbsp;                    &quot;division, square_root and random_string&quot;);
 &nbsp;        }
 &nbsp;    }
 &nbsp;
@@ -201,36 +221,12 @@ Current scope:     <a href="../../index.html">all classes</a>
 &nbsp;        });
 &nbsp;    }
 &nbsp;
-&nbsp;    public Operation getOperation(String type, BigDecimal value1, BigDecimal value2) {
-&nbsp;        try {
-<b class="fc">&nbsp;            OperationType operationType = OperationType.valueOf(type.toUpperCase());</b>
-<b class="fc">&nbsp;            checkValues(value1, value2, operationType);</b>
-&nbsp;
-<b class="fc">&nbsp;            return operationRepository.findByType(operationType)</b>
-<b class="fc">&nbsp;                    .orElseThrow(() -&gt; {</b>
-<b class="fc">&nbsp;                        logger.warn(&quot;Operation type not found: {}&quot;, operationType);</b>
-<b class="fc">&nbsp;                        return new NotFoundException(&quot;Operation type not found&quot;);</b>
-&nbsp;                    });
-<b class="nc">&nbsp;        } catch (UnsupportedOperationException e) {</b>
-<b class="nc">&nbsp;            throw new BadRequestException(&quot;Invalid operation type: &quot; + type, e.getMessage());</b>
-&nbsp;        }
-&nbsp;    }
-&nbsp;
-&nbsp;    void checkValues(BigDecimal value1, BigDecimal value2, OperationType operationType) {
-<b class="fc">&nbsp;        boolean needTwoValues = operationType == OperationType.ADDITION ||</b>
-&nbsp;                operationType == OperationType.SUBTRACTION ||
-&nbsp;                operationType == OperationType.MULTIPLICATION ||
-&nbsp;                operationType == OperationType.DIVISION;
-&nbsp;
-<b class="fc">&nbsp;        if (value1 == null) {</b>
-<b class="nc">&nbsp;            throw new BadRequestException(&quot;The first value is required for operation: &quot; + operationType);</b>
-&nbsp;        }
-&nbsp;
-<b class="fc">&nbsp;        if (needTwoValues &amp;&amp; value2 == null) {</b>
-<b class="nc">&nbsp;            throw new BadRequestException(&quot;The second value is required for operation: &quot; + operationType);</b>
-&nbsp;        }
-&nbsp;
-<b class="fc">&nbsp;        logger.debug(&quot;Checked values successfully: value1={}, value2={}, operationType={}&quot;, value1, value2, operationType);</b>
+&nbsp;    public Operation getOperation(OperationType operationType, BigDecimal value1, BigDecimal value2) {
+<b class="fc">&nbsp;        return operationRepository.findByType(operationType)</b>
+<b class="fc">&nbsp;                .orElseThrow(() -&gt; {</b>
+<b class="fc">&nbsp;                    logger.warn(&quot;Operation type not found: {}&quot;, operationType);</b>
+<b class="fc">&nbsp;                    return new NotFoundException(&quot;Operation type not found&quot;);</b>
+&nbsp;                });
 &nbsp;    }
 &nbsp;
 &nbsp;    User checkBalance(User user, Integer cost) {
@@ -251,50 +247,30 @@ Current scope:     <a href="../../index.html">all classes</a>
 <b class="fc">&nbsp;            throw new UnsupportedOperationException(&quot;Unsupported operation type: null&quot;);</b>
 &nbsp;        }
 &nbsp;
-&nbsp;        try {
-<b class="fc">&nbsp;            switch (type) {</b>
-&nbsp;                case ADDITION:
-<b class="fc">&nbsp;                    return formatBigDecimal(value1.add(value2));</b>
-&nbsp;                case SUBTRACTION:
-<b class="fc">&nbsp;                    return formatBigDecimal(value1.subtract(value2));</b>
-&nbsp;                case MULTIPLICATION:
-<b class="fc">&nbsp;                    return formatBigDecimal(value1.multiply(value2));</b>
-&nbsp;                case DIVISION:
-<b class="fc">&nbsp;                    return division(value1, value2);</b>
-&nbsp;                case SQUARE_ROOT:
-<b class="fc">&nbsp;                    return squareRoot(value1);</b>
-&nbsp;                case RANDOM_STRING:
-<b class="fc">&nbsp;                    return client.fetchRandomString(value1.intValue());</b>
-&nbsp;                default:
-<b class="nc">&nbsp;                    throw new UnsupportedOperationException(&quot;Unsupported operation type: &quot; + type);</b>
-&nbsp;            }
-<b class="fc">&nbsp;        } catch (UnsupportedOperationException | ArithmeticException e) {</b>
-<b class="fc">&nbsp;            logger.error(&quot;Error executing operation: {}&quot;, e.getMessage(), e);</b>
-<b class="fc">&nbsp;            throw e;</b>
-&nbsp;        }
+<b class="pc">&nbsp;        return switch (type) {</b>
+<b class="fc">&nbsp;            case ADDITION -&gt; formatBigDecimal(value1.add(value2));</b>
+<b class="fc">&nbsp;            case SUBTRACTION -&gt; formatBigDecimal(value1.subtract(value2));</b>
+<b class="fc">&nbsp;            case MULTIPLICATION -&gt; formatBigDecimal(value1.multiply(value2));</b>
+<b class="fc">&nbsp;            case DIVISION -&gt; division(value1, value2);</b>
+<b class="fc">&nbsp;            case SQUARE_ROOT -&gt; squareRoot(value1);</b>
+<b class="fc">&nbsp;            case RANDOM_STRING -&gt; client.fetchRandomString(value1.intValue());</b>
+&nbsp;        };
 &nbsp;    }
 &nbsp;
-&nbsp;    BigDecimal[] validateOperationValues(OperationType type, String value1Str, String value2Str) {
-<b class="fc">&nbsp;        if (value1Str == null) {</b>
+&nbsp;    void validateOperationValues(OperationType type, BigDecimal value1, BigDecimal value2) {
+<b class="fc">&nbsp;        if (value1 == null) {</b>
 <b class="fc">&nbsp;            throw new BadRequestException(&quot;The first value (value1) is required for operation: &quot; + type);</b>
 &nbsp;        }
 &nbsp;
-<b class="fc">&nbsp;        BigDecimal value1 = parseBigDecimal(value1Str, &quot;value1&quot;);</b>
-<b class="fc">&nbsp;        BigDecimal value2 = null;</b>
-&nbsp;
-<b class="fc">&nbsp;        if (!requiresSecondValue(type)) {</b>
-<b class="fc">&nbsp;            if (value2Str != null) {</b>
-<b class="fc">&nbsp;                throw new BadRequestException(&quot;Invalid payload: value2 is not allowed for operation: &quot; + type);</b>
+<b class="fc">&nbsp;        if (requiresSecondValue(type)) {</b>
+<b class="fc">&nbsp;            if (value2 == null) {</b>
+<b class="fc">&nbsp;                throw new BadRequestException(&quot;The second value (value2) is required for operation: &quot; + type);</b>
 &nbsp;            }
-<b class="fc">&nbsp;        } else if (value2Str == null) {</b>
-<b class="fc">&nbsp;            throw new BadRequestException(&quot;The second value (value2) is required for operation: &quot; + type);</b>
-&nbsp;        } else {
-<b class="fc">&nbsp;            value2 = parseBigDecimal(value2Str, &quot;value2&quot;);</b>
+<b class="pc">&nbsp;        } else if (value2 != null) {</b>
+<b class="fc">&nbsp;            throw new BadRequestException(&quot;Invalid payload: value2 is not allowed for operation: &quot; + type);</b>
 &nbsp;        }
-&nbsp;
-&nbsp;
-<b class="fc">&nbsp;        return new BigDecimal[]{value1, value2};</b>
 &nbsp;    }
+&nbsp;
 &nbsp;
 &nbsp;    private boolean requiresSecondValue(OperationType type) {
 <b class="fc">&nbsp;        return type == OperationType.ADDITION || type == OperationType.SUBTRACTION</b>
@@ -319,7 +295,7 @@ Current scope:     <a href="../../index.html">all classes</a>
 &nbsp;
 &nbsp;    private BigDecimal sqrt(BigDecimal value, MathContext mc) {
 <b class="fc">&nbsp;        BigDecimal x0 = BigDecimal.ZERO;</b>
-<b class="fc">&nbsp;        BigDecimal x1 = new BigDecimal(Math.sqrt(value.doubleValue()));</b>
+<b class="fc">&nbsp;        BigDecimal x1 = BigDecimal.valueOf(Math.sqrt(value.doubleValue()));</b>
 <b class="fc">&nbsp;        while (!x0.equals(x1)) {</b>
 <b class="fc">&nbsp;            x0 = x1;</b>
 <b class="fc">&nbsp;            x1 = value.divide(x0, mc);</b>
@@ -367,7 +343,7 @@ Current scope:     <a href="../../index.html">all classes</a>
 
 <div class="footer">
     
-    <div style="float:right;">generated on 2024-11-26 15:34</div>
+    <div style="float:right;">generated on 2024-11-26 21:35</div>
 </div>
 </body>
 </html>

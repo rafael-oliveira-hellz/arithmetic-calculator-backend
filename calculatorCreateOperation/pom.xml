@@ -25,7 +25,6 @@
     </properties>
 
     <dependencies>
-        <!-- AWS Serverless Java Container -->
         <dependency>
             <groupId>com.amazonaws.serverless</groupId>
             <artifactId>aws-serverless-java-container-springboot3</artifactId>
@@ -39,16 +38,12 @@
             <type>test-jar</type>
             <scope>test</scope>
         </dependency>
-
-        <!-- HTTP Client -->
         <dependency>
             <groupId>org.apache.httpcomponents.client5</groupId>
             <artifactId>httpclient5</artifactId>
             <version>5.2.1</version>
             <scope>test</scope>
         </dependency>
-
-        <!-- Spring Boot Web Starter -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
@@ -59,15 +54,11 @@
                 </exclusion>
             </exclusions>
         </dependency>
-
-        <!-- AWS Cognito SDK -->
         <dependency>
             <groupId>software.amazon.awssdk</groupId>
             <artifactId>cognitoidentityprovider</artifactId>
             <version>2.20.73</version>
         </dependency>
-
-        <!-- Testing Dependencies -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
@@ -103,35 +94,25 @@
             <version>2.2.224</version>
             <scope>test</scope>
         </dependency>
-
-        <!-- Spring Boot Data JPA -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-jpa</artifactId>
         </dependency>
-
-        <!-- PostgreSQL Driver -->
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
             <scope>runtime</scope>
         </dependency>
-
-        <!-- Lombok -->
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <scope>provided</scope>
         </dependency>
-
-        <!-- Jakarta Validation API -->
         <dependency>
             <groupId>jakarta.validation</groupId>
             <artifactId>jakarta.validation-api</artifactId>
             <version>3.0.2</version>
         </dependency>
-
-        <!-- Nimbus JOSE JWT -->
         <dependency>
             <groupId>com.nimbusds</groupId>
             <artifactId>nimbus-jose-jwt</artifactId>
@@ -189,7 +170,6 @@
             </activation>
             <build>
                 <plugins>
-                    <!-- Don't build a jar, we'll use the classes dir -->
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-jar-plugin</artifactId>
@@ -209,7 +189,6 @@
                             <skip>true</skip>
                         </configuration>
                     </plugin>
-                    <!-- Select and copy only runtime dependencies to a temporary lib folder -->
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-dependency-plugin</artifactId>

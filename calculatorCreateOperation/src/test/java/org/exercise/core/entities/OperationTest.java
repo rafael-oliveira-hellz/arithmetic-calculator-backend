@@ -38,6 +38,17 @@ class OperationTest {
     }
 
     @Test
+    void testOperationAllArgsConstructor() {
+        Operation operation = new Operation(UUID.randomUUID(), OperationType.ADDITION, 10);
+
+        assertNotNull(operation.getId());
+        assertNotNull(operation.getType());
+        assertNotNull(operation.getCost());
+        assertEquals(OperationType.ADDITION, operation.getType());
+        assertEquals(10, operation.getCost());
+    }
+
+    @Test
     void testAnnotations() {
         assertTrue(Operation.class.isAnnotationPresent(Entity.class));
 

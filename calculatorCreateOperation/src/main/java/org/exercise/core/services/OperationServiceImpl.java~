@@ -48,9 +48,12 @@ public class OperationServiceImpl implements OperationService {
         OperationType operationType = OperationType.valueOf(type.toUpperCase());
 
         logger.info("Validating operation values");
+
         BigDecimal[] values = validateOperationValues(operationType, value1Str, value2Str);
         BigDecimal value1 = values[0];
         BigDecimal value2 = values[1];
+
+        logger.info("Validated operation values: value1={}, value2={}, operationType={}", value1, value2, type);
 
         Operation operation = getOperation(type, value1, value2);
 
@@ -61,6 +64,8 @@ public class OperationServiceImpl implements OperationService {
     }
 
     BigDecimal parseBigDecimal(String valueStr, String valueName) {
+        logger.info("Parsing {} with value: {}", valueName, valueStr);
+
         try {
             return new BigDecimal(valueStr);
         } catch (NumberFormatException e) {
@@ -169,6 +174,9 @@ public class OperationServiceImpl implements OperationService {
     }
 
     BigDecimal[] validateOperationValues(OperationType type, String value1Str, String value2Str) {
+        logger.info("validateOperationValues called with: type={}, value1Str={}, value2Str={}, requiresSecondValue={}",
+                type, value1Str, value2Str, requiresSecondValue(type));
+
         if (value1Str == null) {
             throw new BadRequestException("The first value (value1) is required for operation: " + type);
         }
@@ -176,17 +184,18 @@ public class OperationServiceImpl implements OperationService {
         BigDecimal value1 = parseBigDecimal(value1Str, "value1");
         BigDecimal value2 = null;
 
-        if (!requiresSecondValue(type)) {
-            if (value2Str != null) {
-                throw new BadRequestException("Invalid payload: value2 is not allowed for operation: " + type);
-            }
-        } else if (value2Str == null) {
-            throw new BadRequestException("The second value (value2) is required for operation: " + type);
-        } else {
-            value2 = parseBigDecimal(value2Str, "value2");
+        boolean needsSecondValue = requiresSecondValue(type);
+
+        if (!needsSecondValue && value2Str != null) {
+            throw new BadRequestException("Invalid payload: value2 is not allowed for operation: " + type);
         }
 
-        System.out.println("value1: " + value1 + ", value2: " + value2);
+        if (needsSecondValue) {
+            if (value2Str == null) {
+                throw new BadRequestException("The second value (value2) is required for operation: " + type);
+            }
+            value2 = parseBigDecimal(value2Str, "value2");
+        }
 
         return new BigDecimal[]{value1, value2};
     }

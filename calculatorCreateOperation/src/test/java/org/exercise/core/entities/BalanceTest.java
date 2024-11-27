@@ -18,6 +18,16 @@ class BalanceTest {
     }
 
     @Test
+    void shouldCreateBalanceUsingAllArgsConstructor() {
+        Balance balance = new Balance(UUID.randomUUID(), 100);
+
+        assertNotNull(balance);
+        assertNotNull(balance.getId());
+        assertNotNull(balance.getAmount());
+        assertEquals(100, balance.getAmount());
+    }
+
+    @Test
     void shouldCreateBalanceUsingParameterizedConstructor() {
         Integer amount = 100;
 

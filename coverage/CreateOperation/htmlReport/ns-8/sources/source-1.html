@@ -99,7 +99,7 @@ Current scope:     <a href="../../index.html">all classes</a>
 &nbsp;
 &nbsp;    @PostMapping(&quot;/operations/{type}&quot;)
 &nbsp;    public ResponseEntity&lt;Record&gt; registerUser(@RequestHeader String accessToken, @PathVariable String type, @RequestBody Values values) {
-<b class="fc">&nbsp;        Record responseRecord = operationService.doOperation(accessToken, type, String.valueOf(values.value1()), String.valueOf(values.value2()));</b>
+<b class="fc">&nbsp;        Record responseRecord = operationService.doOperation(accessToken, type, values.value1(), values.value2());</b>
 <b class="fc">&nbsp;        return ResponseEntity.ok(responseRecord);</b>
 &nbsp;    }
 &nbsp;}
@@ -126,7 +126,7 @@ Current scope:     <a href="../../index.html">all classes</a>
 
 <div class="footer">
     
-    <div style="float:right;">generated on 2024-11-26 15:34</div>
+    <div style="float:right;">generated on 2024-11-26 21:35</div>
 </div>
 </body>
 </html>

@@ -55,15 +55,15 @@ Current scope:     <a href="../../index.html">all classes</a>
     100%
   </span>
   <span class="absValue">
-    (3/3)
+    (5/5)
   </span>
 </td>
 <td class="coverageStat">
   <span class="percent">
-    62,5%
+    100%
   </span>
   <span class="absValue">
-    (5/8)
+    (9/9)
   </span>
 </td>
 </tr>
@@ -76,7 +76,6 @@ Current scope:     <a href="../../index.html">all classes</a>
 
 <pre>
 <code class="sourceCode" id="sourceCode">&nbsp;package org.exercise.infrastructure.lambda;
-&nbsp;
 &nbsp;
 &nbsp;import com.amazonaws.serverless.exceptions.ContainerInitializationException;
 &nbsp;import com.amazonaws.serverless.proxy.model.AwsProxyRequest;
@@ -94,16 +93,26 @@ Current scope:     <a href="../../index.html">all classes</a>
 &nbsp;import java.io.OutputStream;
 &nbsp;
 <b class="fc">&nbsp;public class StreamLambdaHandler implements RequestStreamHandler {</b>
-&nbsp;    private static final SpringBootLambdaContainerHandler&lt;AwsProxyRequest, AwsProxyResponse&gt; handler;
+&nbsp;
 <b class="fc">&nbsp;    private static final Logger logger = LoggerFactory.getLogger(StreamLambdaHandler.class);</b>
+&nbsp;    private static SpringBootLambdaContainerHandler&lt;AwsProxyRequest, AwsProxyResponse&gt; handler;
 &nbsp;
 &nbsp;    static {
+<b class="fc">&nbsp;        initializeHandler();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    static void initializeHandler() {
 &nbsp;        try {
 <b class="fc">&nbsp;            handler = SpringBootLambdaContainerHandler.getAwsProxyHandler(Application.class);</b>
-<b class="nc">&nbsp;        } catch (ContainerInitializationException e) {</b>
-<b class="nc">&nbsp;            logger.error(e.getMessage());</b>
-<b class="nc">&nbsp;            throw new InternalErrorException(&quot;Could not initialize Spring Boot application&quot;);</b>
-<b class="fc">&nbsp;        }</b>
+<b class="fc">&nbsp;        } catch (ContainerInitializationException e) {</b>
+<b class="fc">&nbsp;            logger.error(e.getMessage(), e);</b>
+<b class="fc">&nbsp;            throw new InternalErrorException(&quot;Could not initialize Spring Boot application&quot;);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    // Exposed for testing purposes
+&nbsp;    protected static void resetHandler() {
+<b class="fc">&nbsp;        handler = null;</b>
 &nbsp;    }
 &nbsp;
 &nbsp;    @Override
@@ -135,7 +144,7 @@ Current scope:     <a href="../../index.html">all classes</a>
 
 <div class="footer">
     
-    <div style="float:right;">generated on 2024-11-26 15:34</div>
+    <div style="float:right;">generated on 2024-11-26 21:35</div>
 </div>
 </body>
 </html>

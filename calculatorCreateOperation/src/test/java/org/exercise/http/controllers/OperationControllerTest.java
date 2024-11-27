@@ -13,6 +13,7 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+import java.math.BigDecimal;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -45,7 +46,7 @@ class OperationControllerTest {
     void registerUser_shouldReturnRecordResponse() {
         String accessToken = "dummyAccessToken";
         String type = "exampleType";
-        Values values = new Values(10.0, 20.0);
+        Values values = new Values(BigDecimal.TEN, BigDecimal.valueOf(20));
 
         Operation mockOperation = new Operation();
         User mockUser = new User();
@@ -55,13 +56,13 @@ class OperationControllerTest {
 
         Record expectedRecord = new Record(mockOperation, mockUser, amount, userBalance, operationResponse);
 
-        when(operationService.doOperation(accessToken, type, String.valueOf(values.value1()), String.valueOf(values.value2())))
+        when(operationService.doOperation(accessToken, type, values.value1(), values.value2()))
                 .thenReturn(expectedRecord);
 
         ResponseEntity<Record> response = operationController.registerUser(accessToken, type, values);
 
         assertEquals(expectedRecord, response.getBody());
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        verify(operationService, times(1)).doOperation(accessToken, type, String.valueOf(values.value1()), String.valueOf(values.value2()));
+        verify(operationService, times(1)).doOperation(accessToken, type, values.value1(), values.value2());
     }
 }

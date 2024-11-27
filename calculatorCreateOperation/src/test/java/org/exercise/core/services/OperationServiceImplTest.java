@@ -11,6 +11,7 @@ import org.exercise.core.exceptions.BadRequestException;
 import org.exercise.core.exceptions.NotFoundException;
 import org.exercise.core.exceptions.PaymentRequiredException;
 import org.exercise.core.exceptions.UnsupportedOperationException;
+import org.exercise.core.interfaces.OperationService;
 import org.exercise.infrastructure.clients.RandomStringClient;
 import org.exercise.infrastructure.persistence.OperationRepository;
 import org.exercise.infrastructure.persistence.RecordRepository;
@@ -48,14 +49,16 @@ class OperationServiceImplTest {
     private OperationServiceImpl operationService;
 
     private User user;
-    private Operation operation;
+    private BigDecimal value1;
+    private BigDecimal value2;
 
     @BeforeEach
     void setUp() {
         user = new User();
         user.setId(UUID.randomUUID());
         user.setBalance(new Balance(100));
-        operation = new Operation(OperationType.ADDITION, 10);
+        value1 = BigDecimal.valueOf(10);
+        value2 = BigDecimal.valueOf(20);
     }
 
     @Test
@@ -63,8 +66,6 @@ class OperationServiceImplTest {
         String token = "valid.token.here";
         UUID userId = UUID.randomUUID();
         String type = "ADDITION";
-        String value1Str = "10";
-        String value2Str = "20";
 
         try (MockedStatic<SignedJWT> mockedJWT = mockStatic(SignedJWT.class)) {
             SignedJWT signedJWT = mock(SignedJWT.class);
@@ -82,7 +83,7 @@ class OperationServiceImplTest {
 
             when(recordRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
-            Record result = operationService.doOperation(token, type, value1Str, value2Str);
+            Record result = operationService.doOperation(token, type, value1, value2);
 
             assertNotNull(result);
             assertEquals(OperationType.ADDITION, result.getOperation().getType());
@@ -98,11 +99,9 @@ class OperationServiceImplTest {
     void testDoOperation_InvalidToken() {
         String token = "invalid.token";
         String type = "ADDITION";
-        String value1Str = "10";
-        String value2Str = "20";
 
         BadRequestException exception = assertThrows(BadRequestException.class,
-                () -> operationService.doOperation(token, type, value1Str, value2Str));
+                () -> operationService.doOperation(token, type, value1, value2));
         assertEquals("Invalid access token format: Invalid serialized unsecured/JWS/JWE object: Missing second delimiter", exception.getMessage());
     }
 
@@ -111,8 +110,6 @@ class OperationServiceImplTest {
         String token = "valid.token.here";
         UUID userId = UUID.randomUUID();
         String type = "ADDITION";
-        String value1Str = "10";
-        String value2Str = "20";
 
         try (MockedStatic<SignedJWT> mockedJWT = mockStatic(SignedJWT.class)) {
             SignedJWT signedJWT = mock(SignedJWT.class);
@@ -125,32 +122,8 @@ class OperationServiceImplTest {
             when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
             NotFoundException exception = assertThrows(NotFoundException.class,
-                    () -> operationService.doOperation(token, type, value1Str, value2Str));
+                    () -> operationService.doOperation(token, type, value1, value2));
             assertEquals("User not found. Try logging in again", exception.getMessage());
-        }
-    }
-
-    @Test
-    void testDoOperation_OperationTypeNotFound() throws ParseException {
-        String token = "valid.token.here";
-        UUID userId = UUID.randomUUID();
-        String type = "UNKNOWN_TYPE";
-        String value1Str = "10";
-        String value2Str = "20";
-
-        try (MockedStatic<SignedJWT> mockedJWT = mockStatic(SignedJWT.class)) {
-            SignedJWT signedJWT = mock(SignedJWT.class);
-            JWTClaimsSet claimsSet = mock(JWTClaimsSet.class);
-
-            mockedJWT.when(() -> SignedJWT.parse(token)).thenReturn(signedJWT);
-            when(signedJWT.getJWTClaimsSet()).thenReturn(claimsSet);
-            when(claimsSet.getStringClaim("sub")).thenReturn(userId.toString());
-
-            when(userRepository.findById(userId)).thenReturn(Optional.of(user));
-
-            IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-                    () -> operationService.doOperation(token, type, value1Str, value2Str));
-            assertEquals("No enum constant org.exercise.core.enums.OperationType.UNKNOWN_TYPE", exception.getMessage());
         }
     }
 
@@ -159,8 +132,6 @@ class OperationServiceImplTest {
         String token = "valid.token.here";
         UUID userId = UUID.randomUUID();
         String type = "ADDITION";
-        String value1Str = "10";
-        String value2Str = "20";
 
         try (MockedStatic<SignedJWT> mockedJWT = mockStatic(SignedJWT.class)) {
             SignedJWT signedJWT = mock(SignedJWT.class);
@@ -177,17 +148,9 @@ class OperationServiceImplTest {
             when(operationRepository.findByType(OperationType.ADDITION)).thenReturn(Optional.of(additionOperation));
 
             PaymentRequiredException exception = assertThrows(PaymentRequiredException.class,
-                    () -> operationService.doOperation(token, type, value1Str, value2Str));
+                    () -> operationService.doOperation(token, type, value1, value2));
             assertEquals("Insufficient User Balance for this operation", exception.getMessage());
         }
-    }
-
-
-    @Test
-    void testParseBigDecimal_InvalidFormat() {
-        BadRequestException exception = assertThrows(BadRequestException.class,
-                () -> operationService.parseBigDecimal("invalid", "value1"));
-        assertEquals("Invalid format for value1: invalid", exception.getMessage());
     }
 
     @Test
@@ -269,20 +232,10 @@ class OperationServiceImplTest {
     }
 
     @Test
-    void testValidateOperationValues_Success() {
-        OperationType type = OperationType.ADDITION;
-
-        BigDecimal[] result = operationService.validateOperationValues(type, "10", "20");
-
-        assertEquals(new BigDecimal("10"), result[0]);
-        assertEquals(new BigDecimal("20"), result[1]);
-    }
-
-    @Test
     void testValidateOperationValues_Value2Missing() {
         OperationType type = OperationType.ADDITION;
         BadRequestException exception = assertThrows(BadRequestException.class,
-                () -> operationService.validateOperationValues(type, "10", null));
+                () -> operationService.validateOperationValues(type, value1, null));
         assertEquals("The second value (value2) is required for operation: ADDITION", exception.getMessage());
     }
 
@@ -291,7 +244,7 @@ class OperationServiceImplTest {
         when(operationRepository.findByType(OperationType.ADDITION)).thenReturn(Optional.empty());
 
         NotFoundException exception = assertThrows(NotFoundException.class,
-                () -> operationService.getOperation("ADDITION", BigDecimal.TEN, BigDecimal.ONE));
+                () -> operationService.getOperation(OperationType.ADDITION, BigDecimal.TEN, BigDecimal.ONE));
         assertEquals("Operation type not found", exception.getMessage());
     }
 
@@ -300,8 +253,6 @@ class OperationServiceImplTest {
         String token = "valid.token.here";
         UUID userId = UUID.randomUUID();
         String type = "ADDITION";
-        String value1Str = "invalid";
-        String value2Str = "20";
 
         try (MockedStatic<SignedJWT> mockedJWT = mockStatic(SignedJWT.class)) {
             SignedJWT signedJWT = mock(SignedJWT.class);
@@ -314,8 +265,8 @@ class OperationServiceImplTest {
             when(userRepository.findById(userId)).thenReturn(Optional.of(user));
 
             BadRequestException exception = assertThrows(BadRequestException.class,
-                    () -> operationService.doOperation(token, type, value1Str, value2Str));
-            assertEquals("Invalid format for value1: invalid", exception.getMessage());
+                    () -> operationService.doOperation(token, type, null, value2));
+            assertEquals("The first value (value1) is required for operation: ADDITION", exception.getMessage());
         }
     }
 
@@ -324,8 +275,6 @@ class OperationServiceImplTest {
         String token = "valid.token.here";
         UUID userId = UUID.randomUUID();
         String type = "ADDITION";
-        String value1Str = "10";
-        String value2Str = "invalid";
 
         try (MockedStatic<SignedJWT> mockedJWT = mockStatic(SignedJWT.class)) {
             SignedJWT signedJWT = mock(SignedJWT.class);
@@ -338,8 +287,8 @@ class OperationServiceImplTest {
             when(userRepository.findById(userId)).thenReturn(Optional.of(user));
 
             BadRequestException exception = assertThrows(BadRequestException.class,
-                    () -> operationService.doOperation(token, type, value1Str, value2Str));
-            assertEquals("Invalid format for value2: invalid", exception.getMessage());
+                    () -> operationService.doOperation(token, type, value1, null));
+            assertEquals("The second value (value2) is required for operation: ADDITION", exception.getMessage());
         }
     }
 
@@ -347,14 +296,14 @@ class OperationServiceImplTest {
     @Test
     void testValidateOperationValues_Value1Missing() {
         BadRequestException exception = assertThrows(BadRequestException.class,
-                () -> operationService.validateOperationValues(OperationType.ADDITION, null, "20"));
+                () -> operationService.validateOperationValues(OperationType.ADDITION, null, value2));
         assertEquals("The first value (value1) is required for operation: ADDITION", exception.getMessage());
     }
 
     @Test
     void testValidateOperationValues_Value2NotAllowed() {
         BadRequestException exception = assertThrows(BadRequestException.class,
-                () -> operationService.validateOperationValues(OperationType.SQUARE_ROOT, "10", "20"));
+                () -> operationService.validateOperationValues(OperationType.SQUARE_ROOT, value1, value2));
         assertEquals("Invalid payload: value2 is not allowed for operation: SQUARE_ROOT", exception.getMessage());
     }
 
@@ -418,13 +367,73 @@ class OperationServiceImplTest {
 
     @Test
     void testFormatBigDecimal_Integer() {
-        String result = operationService.formatBigDecimal(new BigDecimal("100"));
+        String result = OperationServiceImpl.formatBigDecimal(new BigDecimal("100"));
         assertEquals("100", result);
     }
 
     @Test
     void testFormatBigDecimal_Decimal() {
-        String result = operationService.formatBigDecimal(new BigDecimal("100.5000"));
+        String result = OperationServiceImpl.formatBigDecimal(new BigDecimal("100.5000"));
         assertEquals("100,5", result);
     }
+
+    @Test
+    void shouldThrowExceptionWhenOperationTypeIsNotSupported() {
+        assertThrows(BadRequestException.class, () -> {
+            operationService.validateOperationValues(null, value1, value2);
+        });
+    }
+
+    @Test
+    void shouldThrowExceptionWhenSecondValueIsMissing() {
+        assertThrows(BadRequestException.class, () -> {
+            operationService.validateOperationValues(OperationType.DIVISION, value1, null);
+        });
+        assertThrows(BadRequestException.class, () -> {
+            operationService.validateOperationValues(OperationType.ADDITION, value1, null);
+        });
+        assertThrows(BadRequestException.class, () -> {
+            operationService.validateOperationValues(OperationType.SUBTRACTION, value1, null);
+        });
+        assertThrows(BadRequestException.class, () -> {
+            operationService.validateOperationValues(OperationType.MULTIPLICATION, value1, null);
+        });
+    }
+
+    @Test
+    void shouldThrowExceptionWhenUserBalanceIsInsufficient() {
+        user.setBalance(new Balance(1));
+        Integer cost = 10;
+
+        assertThrows(PaymentRequiredException.class, () -> {
+            operationService.checkBalance(user, cost);
+        });
+    }
+
+    @Test
+    void shouldThrowExceptionWhenResultIsNegative() {
+        BigDecimal negative = BigDecimal.valueOf(-1);
+
+        assertThrows(UnsupportedOperationException.class, () -> {
+            operationService.executeOperation(OperationType.SQUARE_ROOT, negative, null);
+        });
+    }
+
+    @Test
+    void shouldThrowExceptionWhenThereAreTwoValuesForSingleValueOperation() {
+        assertThrows(BadRequestException.class, () -> {
+            operationService.validateOperationValues(OperationType.SQUARE_ROOT, value1, value2);
+        });
+        assertThrows(BadRequestException.class, () -> {
+            operationService.validateOperationValues(OperationType.RANDOM_STRING, value1, value2);
+        });
+    }
+
+    @Test
+    void shouldThrowExceptionWhenOperationTypeIsInvalid() {
+        assertThrows(BadRequestException.class, () -> {
+            OperationServiceImpl.getOperationType("invalid type");
+        });
+    }
+
 }
